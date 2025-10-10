@@ -11,6 +11,12 @@ export default function ModalScreen() {
       <Link href="/" dismissTo style={styles.link}>
         <ThemedText type="link">Go to home screen</ThemedText>
       </Link>
+       <Link href="/inscription" dismissTo style={styles.link}>
+        <ThemedText type="link">profil</ThemedText>
+      </Link>
+       <Link href="/connexion" dismissTo style={styles.link}>
+        <ThemedText type="link">Proct</ThemedText>
+      </Link>
     </ThemedView>
   );
 }

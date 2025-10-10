@@ -1,3 +1,4 @@
+import React from 'react'
 import { Image } from 'expo-image';
 import { Platform, StyleSheet } from 'react-native';
 
@@ -7,9 +8,10 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
 
-export default function HomeScreen() {
+function HomeView() {
   return (
-    <ParallaxScrollView
+    
+       <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={
         <Image
@@ -75,8 +77,9 @@ export default function HomeScreen() {
         </ThemedText>
       </ThemedView>
     </ParallaxScrollView>
-  );
+  )
 }
+
 
 const styles = StyleSheet.create({
   titleContainer: {
@@ -96,3 +99,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
 });
+
+export default HomeView
