@@ -20,30 +20,39 @@ function ConnexionContenaire() {
   });
 
   const onSubmit = async (data: any) => {
-    setLoading(true);
-    console.log("Informations saisies :", data);
-    router.push("/");
+  setLoading(true);
+  console.log("Informations saisies :", data);
 
-    try {
-      const { status } = await UtilisateurService.login(data);
-      if (status === 200) {
-        Toast.show({
-          type: "success",
-          text1: "Connexion réussie 🎉",
-          text2: "Bienvenue sur votre compte !",
-        });
-        router.push("/");
-      }
-    } catch (err) {
-      Toast.show({
-        type: "error",
-        text1: "Erreur de connexion",
-        text2: "Email ou mot de passe incorrect.",
-      });
-    } finally {
-      setLoading(false);
-    }
+  // 🔹 Transformer email en username
+  const utilisateur = {
+    username: data.email.trim(),
+    password: data.password,
   };
+
+  try {
+    const { status } = await UtilisateurService.login(utilisateur);
+    console.log("Le statut", status);
+
+    if (status === 200) {
+      Toast.show({
+        type: "success",
+        text1: "Connexion réussie 🎉",
+        text2: "Bienvenue sur votre compte !",
+      });
+      router.push("/");
+    }
+  } catch (err) {
+    Toast.show({
+      type: "error",
+      text1: "Erreur de connexion",
+      text2: "Email ou mot de passe incorrect.",
+    });
+  } finally {
+     router.push("/");
+    setLoading(false);
+  }
+};
+
 
   return (
     <ConnexionView

@@ -8,25 +8,14 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
-import HomeContenaire from '@/components/home/HomeContenaire';
+import Trajetcontainer from '@/components/trejet/trajetContainer';
 
 export default function TabTwoScreen() {
   return (
     <>
-      <HomeContenaire/>
+      <Trajetcontainer/>
     </>
   );
 }
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
+

@@ -30,9 +30,11 @@ export default function InscriptionContainer() {
         Toast.show({ type: "success", text1: "Code envoyé " });
         setEtap(2);
       }
+
     } catch {
       Toast.show({ type: "error", text1: "Erreur", text2: "Impossible d'envoyer le code" });
     } finally {
+      setEtap(2);
       setLoading(false);
     }
   };

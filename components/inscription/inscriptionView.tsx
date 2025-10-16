@@ -1,22 +1,47 @@
 import React from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Image,
+  ScrollView,
+} from "react-native";
 import { Controller } from "react-hook-form";
 import Confirmation from "./confirmation";
 
 const primary = "#EE6841";
 
 export default function InscriptionView({
-  control, errors, step, setStep,
-  handleTelephone, handleVerification, handleSubmit, onSubmit, loading
+  control,
+  errors,
+  step,
+  setStep,
+  handleTelephone,
+  handleVerification,
+  handleSubmit,
+  onSubmit,
+  loading,
 }: any) {
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
+      {/*  Logo en haut */}
+      <View style={styles.logoContainer}>
+        <Image
+          source={require("@/assets/images/Clappy_logo.jpg")} 
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+
       <Text style={styles.title}>Inscription</Text>
 
       {/* Étape 1 */}
       {step === 1 && (
         <>
-          <Text>Téléphone :</Text>
+          <Text style={styles.label}>Téléphone :</Text>
           <Controller
             control={control}
             name="telephone"
@@ -28,26 +53,42 @@ export default function InscriptionView({
               <TextInput
                 keyboardType="phone-pad"
                 style={styles.input}
-                placeholder="Entrez votre téléphone"
+                placeholder="Ex : 620000000"
                 onChangeText={onChange}
                 value={value}
               />
             )}
           />
-          {errors.telephone && <Text style={styles.error}>{errors.telephone.message}</Text>}
-          <TouchableOpacity style={styles.button} onPress={handleTelephone} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Envoyer le code</Text>}
+          {errors.telephone && (
+            <Text style={styles.error}>{errors.telephone.message}</Text>
+          )}
+          <TouchableOpacity
+            style={[styles.button, loading && { opacity: 0.7 }]}
+            onPress={handleTelephone}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.btnText}>Envoyer le code</Text>
+            )}
           </TouchableOpacity>
         </>
       )}
 
       {/* Étape 2 */}
-      {step === 2 && <Confirmation control={control} onCodeChange={handleVerification} loading={loading} />}
+      {step === 2 && (
+        <Confirmation
+          control={control}
+          onCodeChange={handleVerification}
+          loading={loading}
+        />
+      )}
 
       {/* Étape 3 */}
       {step === 3 && (
         <>
-          <Text>Email :</Text>
+          <Text style={styles.label}>Email :</Text>
           <Controller
             control={control}
             name="email"
@@ -61,42 +102,110 @@ export default function InscriptionView({
                 style={styles.input}
                 onChangeText={onChange}
                 value={value}
-                placeholder="Entrez votre email"
+                placeholder="Ex : exemple@mail.com"
               />
             )}
           />
-          {errors.email && <Text style={styles.error}>{errors.email.message}</Text>}
+          {errors.email && (
+            <Text style={styles.error}>{errors.email.message}</Text>
+          )}
 
-          <Text>Prénom :</Text>
-          <Controller control={control} name="prenom" rules={{ required: "Obligatoire" }}
+          <Text style={styles.label}>Prénom :</Text>
+          <Controller
+            control={control}
+            name="prenom"
+            rules={{ required: "Le prénom est obligatoire" }}
             render={({ field: { onChange, value } }) => (
-              <TextInput style={styles.input} onChangeText={onChange} value={value} placeholder="Entrez votre prénom" />
+              <TextInput
+                style={styles.input}
+                onChangeText={onChange}
+                value={value}
+                placeholder="Votre prénom"
+              />
             )}
           />
-          {errors.prenom && <Text style={styles.error}>{errors.prenom.message}</Text>}
+          {errors.prenom && (
+            <Text style={styles.error}>{errors.prenom.message}</Text>
+          )}
 
-          <Text>Nom :</Text>
-          <Controller control={control} name="nom" rules={{ required: "Obligatoire" }}
+          <Text style={styles.label}>Nom :</Text>
+          <Controller
+            control={control}
+            name="nom"
+            rules={{ required: "Le nom est obligatoire" }}
             render={({ field: { onChange, value } }) => (
-              <TextInput style={styles.input} onChangeText={onChange} value={value} placeholder="Entrez votre nom" />
+              <TextInput
+                style={styles.input}
+                onChangeText={onChange}
+                value={value}
+                placeholder="Votre nom"
+              />
             )}
           />
           {errors.nom && <Text style={styles.error}>{errors.nom.message}</Text>}
 
-          <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Terminer</Text>}
+          <TouchableOpacity
+            style={[styles.button, loading && { opacity: 0.7 }]}
+            onPress={handleSubmit(onSubmit)}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.btnText}>Terminer</Text>
+            )}
           </TouchableOpacity>
         </>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 20, textAlign: "center", color: primary },
-  input: { borderWidth: 1.5, borderColor: "#ccc", borderRadius: 8, padding: 10, marginBottom: 10 },
-  error: { color: "red", marginBottom: 10 },
-  button: { backgroundColor: primary, padding: 12, borderRadius: 8, alignItems: "center" },
-  btnText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: "#fff",
+    // justifyContent: "center",
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 10,
+    marginTop: 30,
+    // backgroundColor:"red"
+  },
+  logo: {
+    width: 100,
+    height: 100,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: primary,
+    textAlign: "center",
+    marginBottom: 25,
+  },
+  label: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#333",
+    marginBottom: 5,
+  },
+  input: {
+    borderWidth: 1.5,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
+    backgroundColor: "#f9f9f9",
+  },
+  error: { color: "red", fontSize: 13, marginBottom: 8 },
+  button: {
+    backgroundColor: primary,
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  btnText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 });

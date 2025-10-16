@@ -52,8 +52,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     // Exemple : vérifier si un token utilisateur existe
-    AsyncStorage.getItem("token").then(token => {
-      setIsAuthenticated(!!token);
+    AsyncStorage.getItem("auth_token").then(auth_token => {
+      setIsAuthenticated(!!auth_token);
+       console.log("Token récupéré :", auth_token);
     });
   }, []);
 
@@ -71,6 +72,8 @@ export default function RootLayout() {
       )}
       <Stack.Screen name="inscription" options={{ headerShown: true }} />
     </Stack>
+    <Toast />
+    <StatusBar style="dark" />
   </ThemeProvider>
 );
 
