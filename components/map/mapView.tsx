@@ -1,235 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import {
-//   View,
-//   TextInput,
-//   TouchableOpacity,
-//   Text,
-//   StyleSheet,
-//   FlatList,
-//   Dimensions,
-//   ActivityIndicator,
-// } from "react-native";
-// import MapView, { Marker, Polyline } from "react-native-maps";
-// import * as Location from "expo-location";
-// import { Ionicons } from "@expo/vector-icons";
-
-// const { width } = Dimensions.get("window");
-
-// // 🔑 Clé gratuite OpenRouteService
-// const ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImQ5YTE3NWZiZTkzZjRkMTJhMzg5YTAzN2Y1OGIzNWQ0IiwiaCI6Im11cm11cjY0In0=";
-// const primary = "#EE6841";
-
-// export default function MapViews() {
-//   const [start, setStart] = useState("");
-//   const [end, setEnd] = useState("");
-//   const [startCoord, setStartCoord] = useState<any>(null);
-//   const [endCoord, setEndCoord] = useState<any>(null);
-//   const [routeCoords, setRouteCoords] = useState<any[]>([]);
-//   const [loading, setLoading] = useState(false);
-
-//   const [startSuggestions, setStartSuggestions] = useState<any[]>([]);
-//   const [endSuggestions, setEndSuggestions] = useState<any[]>([]);
-//   const [showForm, setShowForm] = useState(false);
-
-//   // ✅ Récupérer la position actuelle
-//   useEffect(() => {
-//     (async () => {
-//       const { status } = await Location.requestForegroundPermissionsAsync();
-//       if (status !== "granted") {
-//         alert("Permission de localisation refusée");
-//         return;
-//       }
-//       const loc = await Location.getCurrentPositionAsync({});
-//       const coords = {
-//         latitude: loc.coords.latitude,
-//         longitude: loc.coords.longitude,
-//       };
-//       setStartCoord(coords);
-//       setStart("Ma position actuelle");
-//     })();
-//   }, []);
-
-//   // 🔎 Autocomplétion gratuite
-//   const fetchSuggestions = async (query: string, type: "start" | "end") => {
-//     if (!query) return;
-//     const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}`;
-//     const res = await fetch(url);
-//     const data = await res.json();
-//     const suggestions = data.features.map((f: any) => ({
-//       name: f.properties.name,
-//       city: f.properties.city,
-//       lat: f.geometry.coordinates[1],
-//       lon: f.geometry.coordinates[0],
-//     }));
-//     if (type === "start") setStartSuggestions(suggestions);
-//     else setEndSuggestions(suggestions);
-//   };
-
-//   const selectSuggestion = (item: any, type: "start" | "end") => {
-//     if (type === "start") {
-//       setStart(item.name + (item.city ? ", " + item.city : ""));
-//       setStartCoord({ latitude: item.lat, longitude: item.lon });
-//       setStartSuggestions([]);
-//     } else {
-//       setEnd(item.name + (item.city ? ", " + item.city : ""));
-//       setEndCoord({ latitude: item.lat, longitude: item.lon });
-//       setEndSuggestions([]);
-//     }
-//   };
-
-//   // 🚗 Tracer la route
-//   const traceRoute = async () => {
-//     if (!startCoord || !endCoord) {
-//       alert("Veuillez choisir une destination");
-//       return;
-//     }
-
-//     try {
-//       setLoading(true);
-//       const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_API_KEY}&start=${startCoord.longitude},${startCoord.latitude}&end=${endCoord.longitude},${endCoord.latitude}`;
-//       const response = await fetch(url);
-//       const data = await response.json();
-
-//       if (data.features && data.features.length > 0) {
-//         const coords = data.features[0].geometry.coordinates.map((c: any) => ({
-//           latitude: c[1],
-//           longitude: c[0],
-//         }));
-//         setRouteCoords(coords);
-//       }
-//     } catch (error) {
-//       console.error("Erreur de tracé :", error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <View style={{ flex: 1 }}>
-//       <MapView
-//         style={styles.map}
-//         region={
-//           startCoord
-//             ? { ...startCoord, latitudeDelta: 0.05, longitudeDelta: 0.05 }
-//             : { latitude: 9.5, longitude: -13.7, latitudeDelta: 1, longitudeDelta: 1 }
-//         }
-//         showsUserLocation
-//       >
-//         {startCoord && <Marker coordinate={startCoord} title="Départ" pinColor="green" />}
-//         {endCoord && <Marker coordinate={endCoord} title="Arrivée" pinColor="red" />}
-//         {routeCoords.length > 0 && (
-//           <Polyline coordinates={routeCoords} strokeWidth={5} strokeColor="#007BFF" />
-//         )}
-//       </MapView>
-
-//       {/* 🔘 Bouton pour afficher/masquer le formulaire */}
-//       {!showForm && (
-//         <TouchableOpacity style={styles.addButton} onPress={() => setShowForm(true)}>
-//           <Ionicons name="add" size={28} color="#fff" />
-//         </TouchableOpacity>
-//       )}
-
-//       {showForm && (
-//         <View style={styles.searchContainer}>
-//           <View style={styles.headerForm}>
-//             <Text style={{ fontWeight: "bold", fontSize: 16 }}>Tracer un trajet</Text>
-//             <TouchableOpacity onPress={() => setShowForm(false)}>
-//               <Ionicons name="close" size={24} color="black" />
-//             </TouchableOpacity>
-//           </View>
-
-//           <TextInput
-//             style={styles.input}
-//             placeholder="Destination"
-//             value={end}
-//             onChangeText={(text) => {
-//               setEnd(text);
-//               fetchSuggestions(text, "end");
-//             }}
-//           />
-//           {endSuggestions.length > 0 && (
-//             <FlatList
-//               data={endSuggestions}
-//               keyExtractor={(item, i) => i.toString()}
-//               renderItem={({ item }) => (
-//                 <TouchableOpacity onPress={() => selectSuggestion(item, "end")}>
-//                   <Text style={styles.suggestion}>
-//                     {item.name} {item.city || ""}
-//                   </Text>
-//                 </TouchableOpacity>
-//               )}
-//               style={styles.suggestionsList}
-//             />
-//           )}
-
-//           <TouchableOpacity style={styles.button} onPress={traceRoute} disabled={loading}>
-//             {loading ? (
-//               <ActivityIndicator color="#fff" />
-//             ) : (
-//               <Text style={styles.btnText}>Reserver</Text>
-//             )}
-//           </TouchableOpacity>
-//         </View>
-//       )}
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   map: { flex: 1 },
-//   searchContainer: {
-//     position: "absolute",
-//     top: 20,
-//     left: 10,
-//     right: 10,
-//     backgroundColor: "white",
-//     borderRadius: 10,
-//     padding: 10,
-//     elevation: 5,
-//   },
-//   headerForm: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//     marginBottom: 8,
-//   },
-//   input: {
-//     backgroundColor: "#f1f1f1",
-//     borderRadius: 8,
-//     padding: 8,
-//     marginBottom: 5,
-//   },
-//   suggestionsList: {
-//     maxHeight: 120,
-//     marginBottom: 5,
-//   },
-//   suggestion: {
-//     padding: 8,
-//     borderBottomWidth: 1,
-//     borderColor: "#ddd",
-//   },
-//   button: {
-//     backgroundColor: primary,
-//     padding: 10,
-//     borderRadius: 8,
-//     alignItems: "center",
-//   },
-//   btnText: { color: "#fff", fontWeight: "bold" },
-//   addButton: {
-//     position: "absolute",
-//     bottom: 30,
-//     right: 20,
-//     backgroundColor: primary,
-//     width: 55,
-//     height: 55,
-//     borderRadius: 30,
-//     alignItems: "center",
-//     justifyContent: "center",
-//     elevation: 5,
-//   },
-// });
-
-
 import React, { useEffect, useState, useRef } from "react";
 import {
     View,
@@ -247,7 +15,8 @@ import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
 const ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImQ5YTE3NWZiZTkzZjRkMTJhMzg5YTAzN2Y1OGIzNWQ0IiwiaCI6Im11cm11cjY0In0=";
 const primary = "#EE6841";
@@ -261,8 +30,43 @@ interface Props {
     destLng?: any;
 }
 
+// Types de véhicules disponibles
+const VEHICLE_TYPES = [
+    {
+        id: 1,
+        name: "Taxi Climatisé",
+        icon: "car",
+        pricePerKm: 4000,
+        description: "Confort et fraîcheur garantis"
+    },
+    {
+        id: 2,
+        name: "Taxi Non Climatisé",
+        icon: "car-outline",
+        pricePerKm: 200,
+        description: "Économique et fiable"
+    },
+    {
+        id: 3,
+        name: "Moto Taxi",
+        icon: "bicycle",
+        pricePerKm: 5000,
+        description: "Rapide et pratique"
+    },
+    {
+        id: 4,
+        name: "Véhicule Premium",
+        icon: "diamond",
+        pricePerKm: 7000,
+        description: "Luxe et prestige"
+    }
+];
+
 export default function MapViews({ trajet, startLat, startLng, destLat, destLng }: Props) {
     const mapRef = useRef<MapView>(null);
+    const bottomSheetRef = useRef<BottomSheet>(null);
+    const router = useRouter();
+    
     const [currentLocation, setCurrentLocation] = useState<any>(null);
     const [start, setStart] = useState("");
     const [destination, setDestination] = useState("");
@@ -275,9 +79,12 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
     const [startSuggestions, setStartSuggestions] = useState<any[]>([]);
     const [destSuggestions, setDestSuggestions] = useState<any[]>([]);
     const [showForm, setShowForm] = useState(false);
+    const [showVehicleSheet, setShowVehicleSheet] = useState(false);
+    const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
+    const [calculatedPrice, setCalculatedPrice] = useState<number>(0);
 
     const params = useLocalSearchParams();
-    console.log("api",BASE_URL)
+
     //  Récupération de la position actuelle
     useEffect(() => {
         (async () => {
@@ -307,12 +114,11 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
             };
             setStartCoord(startC);
             setDestCoord(destC);
-            setTimeout(() => traceRoute(startC, destC), 300); // petit délai pour s'assurer que la map est ready
+            setTimeout(() => traceRoute(startC, destC), 300);
         }
     }, [startLat, startLng, destLat, destLng]);
 
-
-    // 🔹 Suggestions via Photon API
+    //  Suggestions via Photon API
     const fetchSuggestions = async (query: string, type: "start" | "dest") => {
         if (!query) return;
         const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&bbox=-15.5,7.0,-7.6,12.7&lang=fr`;
@@ -366,9 +172,16 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
                 animated: true,
             });
             
+            // Ouvrir le bottom sheet pour choisir le véhicule
+            setTimeout(() => {
+                setShowVehicleSheet(true);
+                bottomSheetRef.current?.expand();
+            }, 500);
+            
             if (!trajet) {
-            saveTrajet("Trajet", startC, destC, dist, dur);
-            }        } catch (err) {
+                saveTrajet("Trajet", startC, destC, dist, dur,  start, destination);
+            }
+        } catch (err) {
             console.error(err);
         } finally {
             setLoading(false);
@@ -376,14 +189,46 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
         }
     };
 
+    // Calculer le prix en fonction de la distance et du type de véhicule
+    const calculatePrice = (vehicle: any) => {
+        if (!distance) return 0;
+        const distanceInKm = parseFloat(distance.split(' ')[0]);
+        return Math.round(distanceInKm * vehicle.pricePerKm);
+    };
+
+    // Sélectionner un véhicule
+    const handleVehicleSelect = (vehicle: any) => {
+        const price = calculatePrice(vehicle);
+        setSelectedVehicle(vehicle);
+        setCalculatedPrice(price);
+        
+        // Rediriger vers la page de paiement après un court délai
+        setTimeout(() => {
+            router.push({
+                pathname: "/paiement",
+                params: {
+                    vehicleType: vehicle.name,
+                    price: price.toString(),
+                    distance: distance,
+                    duration: duration,
+                    start: start,
+                    destination: destination,
+                    startLat: startCoord.latitude.toString(),
+                    startLng: startCoord.longitude.toString(),
+                    destLat: destCoord.latitude.toString(),
+                    destLng: destCoord.longitude.toString()
+                }
+            });
+        }, 500);
+    };
+
     //  Enregistrer le trajet
-    const saveTrajet = async (name: string, startC: any, destC: any, dist: any, dur: any) => {
-        const newTrajet = { id: Date.now(), name, startCoord: startC, destCoord: destC, distance: dist, duration: dur };
+    const saveTrajet = async (name: string, startC: any, destC: any, dist: any, dur: any,  start:any,destination:any) => {
+        const newTrajet = { id: Date.now(), name, startCoord: startC, destCoord: destC, distance: dist, duration: dur ,start,destination};
         const existing = await AsyncStorage.getItem("trajets");
         const trajets = existing ? JSON.parse(existing) : [];
         trajets.push(newTrajet);
         await AsyncStorage.setItem("trajets", JSON.stringify(trajets));
-        Alert.alert("Trajet enregistré", `"${name}" a été ajouté.`);
     };
 
     if (!currentLocation) return <ActivityIndicator style={{ flex: 1 }} size="large" color={primary} />;
@@ -473,7 +318,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
                     )}
 
                     <TouchableOpacity style={styles.button} onPress={() => traceRoute()} disabled={loading}>
-                        <Text style={styles.btnText}>{loading ? "Calcul..." : "Tracer la route"}</Text>
+                        <Text style={styles.btnText}>{loading ? "chargement..." : "Suivant"}</Text>
                     </TouchableOpacity>
  
                     {distance && duration && (
@@ -481,6 +326,61 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
                     )}
                 </View>
             )}
+
+            {/* Bottom Sheet pour choisir le véhicule */}
+            <BottomSheet
+                ref={bottomSheetRef}
+                index={-1}
+                snapPoints={['50%', '70%']}
+                enablePanDownToClose={true}
+                onClose={() => setShowVehicleSheet(false)}
+                backgroundStyle={styles.bottomSheetBackground}
+            >
+                <BottomSheetView style={styles.bottomSheetContent}>
+                    <View style={styles.bottomSheetHeader}>
+                        <Text style={styles.bottomSheetTitle}>Choisir un véhicule</Text>
+                        <TouchableOpacity onPress={() => bottomSheetRef.current?.close()}>
+                            <Ionicons name="close" size={24} color="#666" />
+                        </TouchableOpacity>
+                    </View>
+
+                    {distance && duration && (
+                        <View style={styles.routeInfo}>
+                            <Text style={styles.routeInfoText}>Distance: {distance}</Text>
+                            <Text style={styles.routeInfoText}>Durée: {duration}</Text>
+                        </View>
+                    )}
+
+                    <FlatList
+                        data={VEHICLE_TYPES}
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={({ item }) => {
+                            const price = calculatePrice(item);
+                            return (
+                                <TouchableOpacity 
+                                    style={[
+                                        styles.vehicleItem,
+                                        selectedVehicle?.id === item.id && styles.selectedVehicleItem
+                                    ]}
+                                    onPress={() => handleVehicleSelect(item)}
+                                >
+                                    <View style={styles.vehicleInfo}>
+                                        <Ionicons name={item.icon as any} size={24} color={primary} />
+                                        <View style={styles.vehicleDetails}>
+                                            <Text style={styles.vehicleName}>{item.name}</Text>
+                                            <Text style={styles.vehicleDescription}>{item.description}</Text>
+                                        </View>
+                                    </View>
+                                    <View style={styles.priceContainer}>
+                                        <Text style={styles.priceText}>{price} GNF</Text>
+                                        <Text style={styles.priceDetail}>({item.pricePerKm} GNF/km)</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        }}
+                    />
+                </BottomSheetView>
+            </BottomSheet>
         </View>
     );
 }
@@ -542,5 +442,84 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         elevation: 8,
         zIndex: 10,
+    },
+    // Styles pour le Bottom Sheet
+    bottomSheetBackground: {
+        backgroundColor: "#fff",
+        borderRadius: 20,
+    },
+    bottomSheetContent: {
+        flex: 1,
+        padding: 16,
+    },
+    bottomSheetHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+    bottomSheetTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#333",
+    },
+    routeInfo: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        backgroundColor: "#f8f8f8",
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 16,
+    },
+    routeInfoText: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#666",
+    },
+    vehicleItem: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#f0f0f0",
+        borderRadius: 8,
+        marginBottom: 8,
+    },
+    selectedVehicleItem: {
+        backgroundColor: "#FFF5F2",
+        borderColor: primary,
+        borderWidth: 1,
+    },
+    vehicleInfo: {
+        flexDirection: "row",
+        alignItems: "center",
+        flex: 1,
+    },
+    vehicleDetails: {
+        marginLeft: 12,
+    },
+    vehicleName: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: "#333",
+    },
+    vehicleDescription: {
+        fontSize: 12,
+        color: "#666",
+        marginTop: 2,
+    },
+    priceContainer: {
+        alignItems: "flex-end",
+    },
+    priceText: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: primary,
+    },
+    priceDetail: {
+        fontSize: 10,
+        color: "#666",
+        marginTop: 2,
     },
 });
