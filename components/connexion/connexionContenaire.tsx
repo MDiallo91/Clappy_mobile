@@ -48,7 +48,7 @@ function ConnexionContenaire() {
       text2: "Email ou mot de passe incorrect.",
     });
   } finally {
-     router.push("/");
+    //  router.push("/");
     setLoading(false);
   }
 };

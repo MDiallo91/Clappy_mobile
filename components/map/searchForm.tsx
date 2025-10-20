@@ -9,32 +9,23 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { primary } from "../../constants/colors";
+import { Alert } from 'react-native';
 
-// Définition des propriétés (props) que le composant SearchForm accepte
 interface SearchFormProps {
-    start: string;                      // Texte saisi pour le point de départ
-    destination: string;                // Texte saisi pour la destination
-    startSuggestions: any[];            // Liste des suggestions pour le départ
-    destSuggestions: any[];             // Liste des suggestions pour la destination
-    distance: string | null;            // Distance calculée du trajet (ex: "5.25 km")
-    duration: string | null;            // Durée calculée du trajet (ex: "15 min")
-    loading: boolean;                   // État de chargement (true pendant le calcul)
-    onStartChange: (text: string) => void;          // Callback quand le texte de départ change
-    onDestinationChange: (text: string) => void;    // Callback quand le texte de destination change
-    onSelectSuggestion: (item: any, type: "start" | "dest") => void; // Callback quand une suggestion est sélectionnée
-    onTraceRoute: () => void;           // Callback pour lancer le calcul d'itinéraire
-    onClose: () => void;                // Callback pour fermer le formulaire
+    start: string;
+    destination: string;
+    startSuggestions: any[];
+    destSuggestions: any[];
+    distance: string | null;
+    duration: string | null;
+    loading: boolean;
+    onStartChange: (text: string) => void;
+    onDestinationChange: (text: string) => void;
+    onSelectSuggestion: (item: any, type: "start" | "dest") => void;
+    onTraceRoute: () => void;
+    onClose: () => void;
 }
 
-/**
- * COMPOSANT PRINCIPAL : SearchForm
- * 
- * Ce composant affiche un formulaire de recherche de trajet avec :
- * - Deux champs de texte pour départ et destination
- * - Des suggestions d'adresses en temps réel
- * - Un bouton pour lancer le calcul d'itinéraire
- * - Affichage des informations du trajet (distance)
- */
 const SearchForm: React.FC<SearchFormProps> = ({
     start,
     destination,
@@ -49,11 +40,34 @@ const SearchForm: React.FC<SearchFormProps> = ({
     onTraceRoute,
     onClose,
 }) => {
+    
+    const handleTraceRoute = () => {
+        console.log("🔄 Bouton Suivant cliqué");
+        console.log("Start:", start);
+        console.log("Destination:", destination);
+        
+        if (!start || start === "📍 Chargement position..." || start === "📍 Position non disponible") {
+            Alert.alert("Point de départ requis", "Veuillez attendre que votre position soit disponible ou sélectionner un point de départ");
+            return;
+        }
+        
+        if (!destination || destination.trim() === "") {
+            Alert.alert("Destination requise", "Veuillez sélectionner une destination");
+            return;
+        }
+        
+        console.log("✅ Validation passée, appel de onTraceRoute");
+        onTraceRoute();
+    };
+
+    const isFormValid = start && 
+                       start !== "📍 Chargement position..." && 
+                       start !== "📍 Position non disponible" && 
+                       destination && 
+                       destination.trim() !== "";
+
     return (
-        // Conteneur principal du formulaire qui flotte au-dessus de la carte
         <View style={styles.searchContainer}>
-            
-            {/* En-tête avec titre et bouton de fermeture */}
             <View style={styles.headerForm}>
                 <Text style={{ fontWeight: "bold", fontSize: 16 }}>Réserver un trajet</Text>
                 <TouchableOpacity onPress={onClose}>
@@ -61,32 +75,25 @@ const SearchForm: React.FC<SearchFormProps> = ({
                 </TouchableOpacity>
             </View>
 
-            {/* CHAMP DE TEXTE : Point de départ */}
             <TextInput
-                placeholder="Départ"                    // Texte indicatif
-                value={start}                           // Valeur contrôlée du champ
+                placeholder="Départ (obligatoire)"
+                value={start}
                 style={styles.input}
-                onChangeText={onStartChange}            // Appelé à chaque frappe
+                onChangeText={onStartChange}
             />
-            
-            {/* AFFICHAGE CONDITIONNEL : Suggestions pour le départ */}
-            {/* Affiche la liste seulement s'il y a des suggestions */}
             {startSuggestions.length > 0 && (
                 <SuggestionsList
                     suggestions={startSuggestions}
                     onSelect={(item) => onSelectSuggestion(item, "start")}
                 />
-            )}                  
+            )}
 
-            {/* CHAMP DE TEXTE : Destination */}
             <TextInput
-                placeholder="Destination"
+                placeholder="Destination (obligatoire)"
                 value={destination}
                 style={styles.input}
                 onChangeText={onDestinationChange}
             />
-            
-            {/* AFFICHAGE CONDITIONNEL : Suggestions pour la destination */}
             {destSuggestions.length > 0 && (
                 <SuggestionsList
                     suggestions={destSuggestions}
@@ -94,117 +101,98 @@ const SearchForm: React.FC<SearchFormProps> = ({
                 />
             )}
 
-            {/* BOUTON : Lancer le calcul d'itinéraire */}
             <TouchableOpacity 
-                style={styles.button} 
-                onPress={onTraceRoute}      // Appelé quand on appuie sur le bouton
-                disabled={loading}          // Désactivé pendant le chargement
+                style={[
+                    styles.button, 
+                    (!isFormValid || loading) && styles.buttonDisabled
+                ]} 
+                onPress={handleTraceRoute}
+                disabled={!isFormValid || loading}
             >
                 <Text style={styles.btnText}>
-                    {/* Texte changeant selon l'état de chargement */}
-                    {loading ? "chargement..." : "Suivant"}
+                    {loading ? "Calcul en cours..." : "Suivant"}
                 </Text>
             </TouchableOpacity>
 
-            {/* AFFICHAGE CONDITIONNEL : Informations du trajet calculé */}
-            {/* Affiche seulement quand la distance est disponible */}
-            {distance && duration && (
+            {distance && (
                 <Text style={styles.infoText}>
                     Distance : {distance}
-                    {/* La durée est commentée mais pourrait être affichée plus tard */}
-                    {/* | Durée : {duration} */}
                 </Text>
             )}
         </View>
     );
 };
 
-/**
- * SOUS-COMPOSANT : SuggestionsList
- * 
- * Affiche une liste déroulante de suggestions d'adresses
- * Utilise FlatList pour des performances optimales avec de longues listes
- */
 const SuggestionsList: React.FC<{
-    suggestions: any[];                // Liste des suggestions à afficher
-    onSelect: (item: any) => void;     // Callback quand un élément est sélectionné
+    suggestions: any[];
+    onSelect: (item: any) => void;
 }> = ({ suggestions, onSelect }) => (
     <FlatList
-        data={suggestions}              // Données à afficher
-        keyExtractor={(item, i) => i.toString()}  // Clé unique pour chaque élément
-        renderItem={({ item }) => (     // Fonction pour rendre chaque élément
+        data={suggestions}
+        keyExtractor={(item, i) => i.toString()}
+        renderItem={({ item }) => (
             <TouchableOpacity 
-                onPress={() => onSelect(item)}  // Appelé quand on appuie sur une suggestion
+                onPress={() => onSelect(item)} 
                 style={styles.suggestionItem}
             >
-                {/* Affichage du nom du lieu et de la ville si disponible */}
                 <Text>{item.name} {item.city || ""}</Text>
             </TouchableOpacity>
         )}
+        style={styles.suggestionsList}
     />
 );
 
-/**
- * STYLES : Définition de l'apparence des éléments
- */
 const styles = StyleSheet.create({
-    // Conteneur principal du formulaire
     searchContainer: {
-        position: "absolute",    // Position absolue pour flotter au-dessus
-        top: 30,                 // 30px du haut de l'écran
-        left: 10,                // 10px de la gauche
-        right: 10,               // 10px de la droite
-        backgroundColor: "#fff", // Fond blanc
-        borderRadius: 10,        // Coins arrondis
-        padding: 10,             // Espacement intérieur
-        elevation: 6,            // Ombre sur Android
-        zIndex: 10,              // Au-dessus des autres éléments
+        position: "absolute",
+        top: 30,
+        left: 10,
+        right: 10,
+        backgroundColor: "#fff",
+        borderRadius: 10,
+        padding: 10,
+        elevation: 6,
+        zIndex: 10,
     },
-    
-    // En-tête avec titre et bouton fermer
     headerForm: {
-        flexDirection: "row",           // Alignement horizontal
-        justifyContent: "space-between",// Titre à gauche, bouton à droite
-        alignItems: "center",           // Centré verticalement
-        marginBottom: 8,                // Espace en dessous
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 8,
     },
-    
-    // Style des champs de texte
     input: {
-        backgroundColor: "#f2f2f2",     // Fond gris clair
-        borderRadius: 8,                // Coins arrondis
-        padding: 8,                     // Espacement intérieur
-        marginBottom: 6,                // Espace entre les champs
+        backgroundColor: "#f2f2f2",
+        borderRadius: 8,
+        padding: 8,
+        marginBottom: 6,
     },
-    
-    // Style de chaque élément de suggestion
+    suggestionsList: {
+        maxHeight: 150,
+    },
     suggestionItem: {
-        padding: 8,                     // Espacement intérieur
-        borderBottomWidth: 1,           // Ligne de séparation
-        borderColor: "#ddd",            // Couleur grise pour la ligne
+        padding: 8,
+        borderBottomWidth: 1,
+        borderColor: "#ddd",
     },
-    
-    // Style du bouton principal
     button: {
-        backgroundColor: primary,       // Couleur principale (orange)
-        padding: 12,                    // Espacement intérieur
-        borderRadius: 8,                // Coins arrondis
-        alignItems: "center",           // Centrage horizontal du texte
-        marginTop: 6,                   // Espace au-dessus
+        backgroundColor: primary,
+        padding: 12,
+        borderRadius: 8,
+        alignItems: "center",
+        marginTop: 6,
     },
-    
-    // Style du texte du bouton
+    buttonDisabled: {
+        backgroundColor: '#ccc',
+    },
     btnText: { 
-        color: "#fff",                  // Texte blanc
-        fontWeight: "bold"              // Texte en gras
+        color: "#fff", 
+        fontWeight: "bold" 
     },
-    
-    // Style des informations du trajet
     infoText: {
-        marginTop: 8,                  
-        fontSize: 16,                  
-        fontWeight: "bold",            
-        textAlign: "center",            // Centré horizontalement
+        marginTop: 8,
+        fontSize: 16,
+        fontWeight: "bold",
+        textAlign: "center",
     },
 });
 

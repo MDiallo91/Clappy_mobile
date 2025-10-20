@@ -7,9 +7,7 @@ import {
     TouchableOpacity,
     FlatList,
     ActivityIndicator,
-    Image,
     Alert,
-    Platform,
 } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
@@ -17,6 +15,8 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import UtilisateurService from "@/services/userService";
+import VehiculeService from "@/services/vehiculeService";
 
 const ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImQ5YTE3NWZiZTkzZjRkMTJhMzg5YTAzN2Y1OGIzNWQ0IiwiaCI6Im11cm11cjY0In0=";
 const primary = "#EE6841";
@@ -29,38 +29,6 @@ interface Props {
     destLat?: any;
     destLng?: any;
 }
-
-// Types de véhicules disponibles
-const VEHICLE_TYPES = [
-    {
-        id: 1,
-        name: "Taxi Climatisé",
-        icon: "car",
-        pricePerKm: 4000,
-        description: "Confort et fraîcheur garantis"
-    },
-    {
-        id: 2,
-        name: "Taxi Non Climatisé",
-        icon: "car-outline",
-        pricePerKm: 200,
-        description: "Économique et fiable"
-    },
-    {
-        id: 3,
-        name: "Moto Taxi",
-        icon: "bicycle",
-        pricePerKm: 5000,
-        description: "Rapide et pratique"
-    },
-    {
-        id: 4,
-        name: "Véhicule Premium",
-        icon: "diamond",
-        pricePerKm: 7000,
-        description: "Luxe et prestige"
-    }
-];
 
 export default function MapViews({ trajet, startLat, startLng, destLat, destLng }: Props) {
     const mapRef = useRef<MapView>(null);
@@ -82,10 +50,12 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
     const [showVehicleSheet, setShowVehicleSheet] = useState(false);
     const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
     const [calculatedPrice, setCalculatedPrice] = useState<number>(0);
-
+    const [user, setUser] = useState<any>([]);
+    const [tarifs, setTarifs] = useState<any>([]);
+    const [transformedTarifs, setTransformedTarifs] = useState<any[]>([]);
     const params = useLocalSearchParams();
 
-    //  Récupération de la position actuelle
+    // Récupération de la position actuelle
     useEffect(() => {
         (async () => {
             const { status } = await Location.requestForegroundPermissionsAsync();
@@ -101,7 +71,109 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
         })();
     }, []);
 
-    //  Si la page reçoit des coordonnées via les props
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const users = await UtilisateurService.getUsers();
+                setUser(users);
+            } catch (error) {
+                console.error("Erreur lors de la récupération des users:", error);
+            }
+        };
+        fetchUsers();
+    }, []);
+
+    // Récupération et transformation des tarifs
+    useEffect(() => {
+        const fetchTarifs = async () => {
+            try {
+                const tarif = await VehiculeService.getTarif();
+                setTarifs(tarif);
+                console.log("les tarifs", tarif);
+                
+                // Transformation des données tarifs
+                const transformed = tarif.map((item: any) => {
+                    let iconName = "car-outline";
+                    let displayName = item.type_vehicule;
+                    let description = "Véhicule standard";
+
+                    switch(item.type_vehicule.toLowerCase()) {
+                        case "economique":
+                            iconName = "car-outline";
+                            displayName = "Économique";
+                            description = "Véhicule économique et confortable";
+                            break;
+                        case "climatiser":
+                            iconName = "snow-outline";
+                            displayName = "Climatisé";
+                            description = "Véhicule climatisé premium";
+                            break;
+                        case "moto":
+                            iconName = "bicycle-outline";
+                            displayName = "Moto Taxi";
+                            description = "Rapide et économique";
+                            break;
+                        case "vip":
+                            iconName = "diamond-outline";
+                            displayName = "VIP";
+                            description = "Service haut de gamme avec chauffeur privé";
+                            break;
+                        case "premium":
+                            iconName = "star-outline";
+                            displayName = "Premium";
+                            description = "Confort et luxe exceptionnels";
+                            break;
+                        case "luxe":
+                            iconName = "diamond";
+                            displayName = "Luxe";
+                            description = "Expérience de voyage ultime";
+                            break;
+                        case "berline":
+                            iconName = "car-sport-outline";
+                            displayName = "Berline";
+                            description = "Élégance et espace";
+                            break;
+                        case "suv":
+                            iconName = "car-outline";
+                            displayName = "SUV";
+                            description = "Spacieux et confortable";
+                            break;
+                        case "minibus":
+                            iconName = "bus-outline";
+                            displayName = "Minibus";
+                            description = "Idéal pour les groupes";
+                            break;
+                        case "camionnette":
+                            iconName = "truck-outline";
+                            displayName = "Camionnette";
+                            description = "Parfaite pour les déménagements";
+                            break;
+                    }
+
+                    return {
+                        id: item.id,
+                        icon: iconName,
+                        name: displayName,
+                        description: description,
+                        prix_base: parseFloat(item.prix_base),
+                        prix_par_km: parseFloat(item.prix_par_km),
+                        type_vehicule: item.type_vehicule,
+                        est_actif: item.est_actif,
+                        // Pour la compatibilité avec calculatePrice
+                        pricePerKm: parseFloat(item.prix_par_km)
+                    };
+                });
+                
+                setTransformedTarifs(transformed);
+                console.log("Tarifs transformés:", transformed);
+            } catch (error) {
+                console.error("Erreur lors de la récupération des tarifs:", error);
+            }
+        };
+        fetchTarifs();
+    }, []);
+
+    // Si la page reçoit des coordonnées via les props
     useEffect(() => {
         if (startLat && destLat && startLng && destLng) {
             const startC = {
@@ -118,7 +190,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
         }
     }, [startLat, startLng, destLat, destLng]);
 
-    //  Suggestions via Photon API
+    // Suggestions via Photon API
     const fetchSuggestions = async (query: string, type: "start" | "dest") => {
         if (!query) return;
         const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&bbox=-15.5,7.0,-7.6,12.7&lang=fr`;
@@ -145,7 +217,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
         }
     };
 
-    //  Tracer la route
+    // Tracer la route
     const traceRoute = async (startC = startCoord, destC = destCoord) => {
         if (!startC || !destC) return Alert.alert("Erreur", "Choisis le départ et la destination.");
         try {
@@ -179,7 +251,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
             }, 500);
             
             if (!trajet) {
-                saveTrajet("Trajet", startC, destC, dist, dur,  start, destination);
+                saveTrajet("Trajet", startC, destC, dist, dur);
             }
         } catch (err) {
             console.error(err);
@@ -191,9 +263,10 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
 
     // Calculer le prix en fonction de la distance et du type de véhicule
     const calculatePrice = (vehicle: any) => {
-        if (!distance) return 0;
+        if (!distance || !vehicle.prix_par_km) return 0;
         const distanceInKm = parseFloat(distance.split(' ')[0]);
-        return Math.round(distanceInKm * vehicle.pricePerKm);
+        const pricePerKm = vehicle.prix_par_km || vehicle.pricePerKm;
+        return Math.round(distanceInKm * pricePerKm);
     };
 
     // Sélectionner un véhicule
@@ -222,9 +295,9 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
         }, 500);
     };
 
-    //  Enregistrer le trajet
-    const saveTrajet = async (name: string, startC: any, destC: any, dist: any, dur: any,  start:any,destination:any) => {
-        const newTrajet = { id: Date.now(), name, startCoord: startC, destCoord: destC, distance: dist, duration: dur ,start,destination};
+    // Enregistrer le trajet
+    const saveTrajet = async (name: string, startC: any, destC: any, dist: any, dur: any) => {
+        const newTrajet = { id: Date.now(), name, startCoord: startC, destCoord: destC, distance: dist, duration: dur };
         const existing = await AsyncStorage.getItem("trajets");
         const trajets = existing ? JSON.parse(existing) : [];
         trajets.push(newTrajet);
@@ -258,7 +331,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
                     </Marker>
                 )}
                 {routeCoords.length > 0 && <Polyline coordinates={routeCoords} strokeWidth={6} strokeColor={primary} />}
-            </MapView>
+            </MapView> 
 
             {!showForm && !trajet && (
                 <TouchableOpacity style={styles.addButton} onPress={() => setShowForm(true)}>
@@ -351,8 +424,9 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
                         </View>
                     )}
 
+                    {/* UNE SEULE FlatList avec les tarifs transformés */}
                     <FlatList
-                        data={VEHICLE_TYPES}
+                        data={transformedTarifs}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => {
                             const price = calculatePrice(item);
@@ -373,18 +447,19 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
                                     </View>
                                     <View style={styles.priceContainer}>
                                         <Text style={styles.priceText}>{price} GNF</Text>
-                                        <Text style={styles.priceDetail}>({item.pricePerKm} GNF/km)</Text>
+                                        <Text style={styles.priceDetail}>({item.prix_par_km} GNF/km)</Text>
                                     </View>
                                 </TouchableOpacity>
                             );
                         }}
                     />
                 </BottomSheetView>
-            </BottomSheet>
+            </BottomSheet> 
         </View>
     );
 }
 
+// Gardez les styles existants...
 const styles = StyleSheet.create({
     container: { flex: 1 },
     map: { flex: 1 },
@@ -443,7 +518,6 @@ const styles = StyleSheet.create({
         elevation: 8,
         zIndex: 10,
     },
-    // Styles pour le Bottom Sheet
     bottomSheetBackground: {
         backgroundColor: "#fff",
         borderRadius: 20,

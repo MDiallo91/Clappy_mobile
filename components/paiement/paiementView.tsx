@@ -1,49 +1,47 @@
-import React, { useState } from 'react';
+// paiementView.tsx
+import React from 'react';
 import {
     View,
     Text,
     StyleSheet,
     TouchableOpacity,
     ScrollView,
-    Alert,
+    ActivityIndicator,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 const primary = "#EE6841";
 
-export default function PaiementView() {
-    const params = useLocalSearchParams();
-    const router = useRouter();
-    
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
-    
-    const paymentMethods = [
-        { id: 'orange', name: 'Orange Money', icon: 'phone-portrait' },
-        { id: 'mtn', name: 'MTN Money', icon: 'phone-portrait' },
-        { id: 'wave', name: 'Wave', icon: 'card' },
-        { id: 'cash', name: 'Espèces', icon: 'cash' },
-        { id: 'card', name: 'Carte Bancaire', icon: 'card' },
-    ];
+interface PaiementViewProps {
+  courseData: {
+    vehicleType: string;
+    price: number;
+    distance: string;
+    duration: string;
+    start: string;
+    destination: string;
+  };
+  selectedPaymentMethod: string;
+  onPaymentMethodSelect: (method: string) => void;
+  onPayment: () => void;
+  loading: boolean;
+}
 
-    const handlePayment = () => {
-        if (!selectedPaymentMethod) {
-            Alert.alert('Erreur', 'Veuillez choisir un mode de paiement');
-            return;
-        }
+const paymentMethods = [
+    { id: 'orange', name: 'Orange Money', icon: 'phone-portrait' },
+    { id: 'mtn', name: 'MTN Money', icon: 'phone-portrait' },
+    { id: 'wave', name: 'Wave', icon: 'card' },
+    { id: 'cash', name: 'Espèces', icon: 'cash' },
+    { id: 'card', name: 'Carte Bancaire', icon: 'card' },
+];
 
-        // Simulation de traitement de paiement
-        Alert.alert(
-            'Paiement réussi',
-            `Votre trajet a été confirmé avec ${selectedPaymentMethod}`,
-            [
-                {
-                    text: 'OK',
-                    onPress: () => router.push('/'),
-                },
-            ]
-        );
-    };
+export default function PaiementView({
+  courseData,
+  selectedPaymentMethod,
+  onPaymentMethodSelect,
+  onPayment,
+  loading
+}: PaiementViewProps) {
 
     return (
         <ScrollView style={styles.container}>
@@ -57,30 +55,30 @@ export default function PaiementView() {
                 <View style={styles.tripInfo}>
                     <View style={styles.infoRow}>
                         <Text style={styles.infoLabel}>Véhicule:</Text>
-                        <Text style={styles.infoValue}>{params.vehicleType}</Text>
+                        <Text style={styles.infoValue}>{courseData.vehicleType}</Text>
                     </View>
                     <View style={styles.infoRow}>
                         <Text style={styles.infoLabel}>Distance:</Text>
-                        <Text style={styles.infoValue}>{params.distance}</Text>
+                        <Text style={styles.infoValue}>{courseData.distance}</Text>
                     </View>
                     <View style={styles.infoRow}>
                         <Text style={styles.infoLabel}>Durée estimée:</Text>
-                        <Text style={styles.infoValue}>{params.duration}</Text>
+                        <Text style={styles.infoValue}>{courseData.duration}</Text>
                     </View>
                     <View style={styles.infoRow}>
                         <Text style={styles.infoLabel}>De:</Text>
-                        <Text style={styles.infoValue}>{params.start}</Text>
+                        <Text style={styles.infoValue}>{courseData.start}</Text>
                     </View>
                     <View style={styles.infoRow}>
                         <Text style={styles.infoLabel}>À:</Text>
-                        <Text style={styles.infoValue}>{params.destination}</Text>
+                        <Text style={styles.infoValue}>{courseData.destination}</Text>
                     </View>
                 </View>
             </View>
 
             {/* Prix total */}
             <View style={styles.priceSection}>
-                <Text style={styles.totalPrice}>{params.price} GNF</Text>
+                <Text style={styles.totalPrice}>{courseData.price} GNF</Text>
                 <Text style={styles.priceLabel}>Total à payer</Text>
             </View>
 
@@ -94,7 +92,8 @@ export default function PaiementView() {
                             styles.paymentMethod,
                             selectedPaymentMethod === method.id && styles.selectedPaymentMethod,
                         ]}
-                        onPress={() => setSelectedPaymentMethod(method.id)}
+                        onPress={() => onPaymentMethodSelect(method.id)}
+                        disabled={loading}
                     >
                         <View style={styles.methodInfo}>
                             <Ionicons 
@@ -117,8 +116,21 @@ export default function PaiementView() {
             </View>
 
             {/* Bouton de confirmation */}
-            <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
-                <Text style={styles.payButtonText}>Payer {params.price} GNF</Text>
+            <TouchableOpacity 
+                style={[
+                    styles.payButton,
+                    loading && styles.payButtonDisabled
+                ]} 
+                onPress={onPayment}
+                disabled={loading || !selectedPaymentMethod}
+            >
+                {loading ? (
+                    <ActivityIndicator color="#fff" />
+                ) : (
+                    <Text style={styles.payButtonText}>
+                        Payer {courseData.price} GNF
+                    </Text>
+                )}
             </TouchableOpacity>
         </ScrollView>
     );
@@ -219,6 +231,9 @@ const styles = StyleSheet.create({
         padding: 16,
         borderRadius: 8,
         alignItems: 'center',
+    },
+    payButtonDisabled: {
+        backgroundColor: '#ccc',
     },
     payButtonText: {
         color: '#fff',
