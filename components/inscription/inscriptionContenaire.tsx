@@ -66,7 +66,7 @@ export default function InscriptionContainer() {
     try {
       const { status } = await UtilisateurService.updateUtilisateur({ telephone: telephoneTemp, ...data });
       if (status === 200) {
-        Toast.show({ type: "success", text1: "Compte complété 🎉" });
+        Toast.show({ type: "success", text1: "Compte complété " });
         router.push("/connexion");
       }
     } catch {

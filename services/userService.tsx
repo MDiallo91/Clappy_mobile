@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BASE_URL = "http://192.168.1.167:8000/api/";
+const BASE_URL ='http://192.168.1.167:8000/api/';
 
 export default class UtilisateurService {
 
@@ -59,7 +59,38 @@ static async login(utilisateur: { username: string; password: string }) {
      console.error(error)
       throw error;
     });
+    
+  } 
+  
+// Récupérer les utilisateurs
+  // Récupérer les utilisateurs
+static async getUsers(): Promise<any[]> {
+  try {
+    // Récupérer le token stocké
+    const token = await AsyncStorage.getItem("auth_token");
+    
+    const response = await fetch(`${BASE_URL}clients`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Ajout du token
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP! statut: ${response.status}`);
+    }
+
+    const users = await response.json();
+    // console.log('Utilisateurs récupérés:', users);
+    return users;
+
+  } catch (error) {
+    console.error('Erreur de connexion:', error);
+    throw error;
   }
+}
+
   
   static updateUtilisateur(utilisateur: any): Promise<any> {
     return fetch(`${BASE_URL}user/${utilisateur.id}`, {
