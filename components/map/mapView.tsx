@@ -28,46 +28,173 @@ interface Props {
     startLng?: any;
     destLat?: any;
     destLng?: any;
+    onRouteReady?: () => void;
 }
 
-export default function MapViews({ trajet, startLat, startLng, destLat, destLng }: Props) {
+interface Coordonnees {
+    latitude: number;
+    longitude: number;
+}
+
+interface TrajetComplet {
+    id: number;
+    name: string;
+    startCoord: Coordonnees;
+    destCoord: Coordonnees;
+    distance: string;
+    duration: string;
+    vehicleType: string;
+    price: string;
+    startAddress: string;
+    destinationAddress: string;
+    timestamp: string;
+}
+
+interface Vehicule {
+    id: number;
+    icon: string;
+    name: string;
+    description: string;
+    prix_base: number;
+    prix_par_km: number;
+    type_vehicule: string;
+    est_actif: boolean;
+    pricePerKm: number;
+}
+
+interface Suggestion {
+    name: string;
+    city: string;
+    country: string;
+    lat: number;
+    lon: number;
+}
+
+
+// Fonction pour obtenir l'adresse à partir des coordonnées
+const getAddressFromCoords = async (coords: Coordonnees): Promise<string> => {
+    try {
+        console.log("📍 Reverse geocoding pour:", coords);
+        const addresses = await Location.reverseGeocodeAsync({
+            latitude: coords.latitude,
+            longitude: coords.longitude
+        });
+        
+        if (addresses && addresses.length > 0) {
+            const address = addresses[0];
+            console.log(" Résultat reverse geocoding:", address);
+            
+            const addressParts = [
+                address.name,
+                address.street,
+                address.district,
+                address.city,
+                address.region,
+                address.country
+            ].filter(part => part && part.trim() !== "");
+            
+            if (addressParts.length > 0) {
+                const formattedAddress = addressParts.join(', ');
+                console.log(" Adresse formatée:", formattedAddress);
+                return formattedAddress;
+            }
+        }
+        
+        // Fallback aux coordonnées
+        const fallbackAddress = `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
+        console.log(" Fallback aux coordonnées:", fallbackAddress);
+        return fallbackAddress;
+        
+    } catch (error) {
+        console.error(" Erreur reverse geocoding:", error);
+        return `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
+    }
+};
+
+export default function MapViews({ trajet, startLat, startLng, destLat, destLng, onRouteReady }: Props) {
     const mapRef = useRef<MapView>(null);
     const bottomSheetRef = useRef<BottomSheet>(null);
     const router = useRouter();
     
-    const [currentLocation, setCurrentLocation] = useState<any>(null);
+    const [currentLocation, setCurrentLocation] = useState<Coordonnees | null>(null);
     const [start, setStart] = useState("");
     const [destination, setDestination] = useState("");
-    const [startCoord, setStartCoord] = useState<any>(null);
-    const [destCoord, setDestCoord] = useState<any>(null);
-    const [routeCoords, setRouteCoords] = useState<any[]>([]);
+    const [startCoord, setStartCoord] = useState<Coordonnees | null>(null);
+    const [destCoord, setDestCoord] = useState<Coordonnees | null>(null);
+    const [routeCoords, setRouteCoords] = useState<Coordonnees[]>([]);
     const [loading, setLoading] = useState(false);
     const [distance, setDistance] = useState<string | null>(null);
     const [duration, setDuration] = useState<string | null>(null);
-    const [startSuggestions, setStartSuggestions] = useState<any[]>([]);
-    const [destSuggestions, setDestSuggestions] = useState<any[]>([]);
+    const [startSuggestions, setStartSuggestions] = useState<Suggestion[]>([]);
+    const [destSuggestions, setDestSuggestions] = useState<Suggestion[]>([]);
     const [showForm, setShowForm] = useState(false);
     const [showVehicleSheet, setShowVehicleSheet] = useState(false);
-    const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
+    const [selectedVehicle, setSelectedVehicle] = useState<Vehicule | null>(null);
     const [calculatedPrice, setCalculatedPrice] = useState<number>(0);
     const [user, setUser] = useState<any>([]);
     const [tarifs, setTarifs] = useState<any>([]);
-    const [transformedTarifs, setTransformedTarifs] = useState<any[]>([]);
+    const [transformedTarifs, setTransformedTarifs] = useState<Vehicule[]>([]);
     const params = useLocalSearchParams();
 
-    // Récupération de la position actuelle
+   // Récupération de la position actuelle avec reverse geocoding
     useEffect(() => {
         (async () => {
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== "granted") {
-                console.warn("Permission de localisation refusée");
-                return;
+            try {
+                const { status } = await Location.requestForegroundPermissionsAsync();
+                if (status !== "granted") {
+                    Alert.alert("Permission requise", "La localisation est nécessaire pour utiliser cette fonctionnalité");
+                    return;
+                }
+                
+                const loc = await Location.getCurrentPositionAsync({});
+                const { latitude, longitude } = loc.coords;
+                setCurrentLocation({ latitude, longitude });
+                setStartCoord({ latitude, longitude });
+                
+                console.log(" Coordonnées actuelles:", latitude, longitude);
+                
+                // Reverse geocoding pour obtenir le nom du lieu
+                const addresses = await Location.reverseGeocodeAsync({
+                    latitude,
+                    longitude
+                });
+                
+                if (addresses && addresses.length > 0) {
+                    const address = addresses[0];
+                    console.log(" Adresse reverse geocoding:", address);
+                    
+                    // Construire une adresse lisible
+                    const addressParts = [
+                        address.name,
+                        address.street,
+                        address.district,
+                        address.city,
+                        address.region
+                    ].filter(part => part && part.trim() !== "");
+                    
+                    let formattedAddress = "Position actuelle";
+                    if (addressParts.length > 0) {
+                        formattedAddress = addressParts.join(', ');
+                    } else if (address.city) {
+                        formattedAddress = address.city;
+                    } else if (address.region) {
+                        formattedAddress = address.region;
+                    }
+                    
+                    setStart(formattedAddress);
+                    console.log(" Adresse formatée:", formattedAddress);
+                } else {
+                    setStart("Position actuelle");
+                    console.log(" Aucune adresse trouvée");
+                }
+                
+            } catch (error) {
+                console.error(" Erreur lors de la géolocalisation:", error);
+                // Fallback aux coordonnées en cas d'erreur
+                if (currentLocation) {
+                    setStart(`${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}`);
+                }
             }
-            const loc = await Location.getCurrentPositionAsync({});
-            const { latitude, longitude } = loc.coords;
-            setCurrentLocation({ latitude, longitude });
-            setStartCoord({ latitude, longitude });
-            setStart(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
         })();
     }, []);
 
@@ -89,10 +216,9 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
             try {
                 const tarif = await VehiculeService.getTarif();
                 setTarifs(tarif);
-                console.log("les tarifs", tarif);
+                console.log(" Tarifs chargés:", tarif);
                 
-                // Transformation des données tarifs
-                const transformed = tarif.map((item: any) => {
+                const transformed: Vehicule[] = tarif.map((item: any) => {
                     let iconName = "car-outline";
                     let displayName = item.type_vehicule;
                     let description = "Véhicule standard";
@@ -159,15 +285,14 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
                         prix_par_km: parseFloat(item.prix_par_km),
                         type_vehicule: item.type_vehicule,
                         est_actif: item.est_actif,
-                        // Pour la compatibilité avec calculatePrice
                         pricePerKm: parseFloat(item.prix_par_km)
                     };
                 });
                 
                 setTransformedTarifs(transformed);
-                console.log("Tarifs transformés:", transformed);
+                console.log(" Véhicules transformés:", transformed.length);
             } catch (error) {
-                console.error("Erreur lors de la récupération des tarifs:", error);
+                console.error(" Erreur lors de la récupération des tarifs:", error);
             }
         };
         fetchTarifs();
@@ -176,11 +301,11 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
     // Si la page reçoit des coordonnées via les props
     useEffect(() => {
         if (startLat && destLat && startLng && destLng) {
-            const startC = {
+            const startC: Coordonnees = {
                 latitude: Number(startLat),
                 longitude: Number(startLng),
             };
-            const destC = {
+            const destC: Coordonnees = {
                 latitude: Number(destLat),
                 longitude: Number(destLng),
             };
@@ -190,47 +315,146 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
         }
     }, [startLat, startLng, destLat, destLng]);
 
+    // Debug des états importants
+    useEffect(() => {
+        console.log(" destination state:", destination);
+    }, [destination]);
+
+    useEffect(() => {
+        console.log(" destCoord state:", destCoord);
+    }, [destCoord]);
+
     // Suggestions via Photon API
     const fetchSuggestions = async (query: string, type: "start" | "dest") => {
-        if (!query) return;
-        const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&bbox=-15.5,7.0,-7.6,12.7&lang=fr`;
-        const res = await fetch(url);
-        const data = await res.json();
-        const suggestions = data.features.map((f: any) => ({
-            name: f.properties.name,
-            city: f.properties.city,
-            lat: f.geometry.coordinates[1],
-            lon: f.geometry.coordinates[0],
-        }));
-        type === "start" ? setStartSuggestions(suggestions) : setDestSuggestions(suggestions);
+        if (!query || query.length < 2) {
+            type === "start" ? setStartSuggestions([]) : setDestSuggestions([]);
+            return;
+        }
+        
+        try {
+            const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&lang=fr`;
+            console.log(" Recherche suggestions:", query);
+            
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            const suggestions: Suggestion[] = data.features
+                .filter((f: any) => f.properties.name)
+                .map((f: any) => ({
+                    name: f.properties.name,
+                    city: f.properties.city || f.properties.county || "",
+                    country: f.properties.country || "",
+                    lat: f.geometry.coordinates[1],
+                    lon: f.geometry.coordinates[0],
+                }))
+                .slice(0, 8);
+            
+            console.log(" Suggestions trouvées:", suggestions.length);
+            
+            type === "start" ? setStartSuggestions(suggestions) : setDestSuggestions(suggestions);
+        } catch (error) {
+            console.error(" Erreur lors de la récupération des suggestions:", error);
+        }
     };
 
-    const selectSuggestion = (item: any, type: "start" | "dest") => {
+    const selectSuggestion = (item: Suggestion, type: "start" | "dest") => {
+        const addressParts = [item.name];
+        if (item.city && item.city !== item.name) {
+            addressParts.push(item.city);
+        }
+        if (item.country && item.country !== "Guinée") {
+            addressParts.push(item.country);
+        }
+        
+        const formattedAddress = addressParts.join(', ');
+        
+        console.log(" Sélection:", { type, formattedAddress, coords: { lat: item.lat, lon: item.lon } });
+        
         if (type === "start") {
-            setStart(`${item.name}, ${item.city || ""}`);
+            setStart(formattedAddress);
             setStartCoord({ latitude: item.lat, longitude: item.lon });
             setStartSuggestions([]);
         } else {
-            setDestination(`${item.name}, ${item.city || ""}`);
+            setDestination(formattedAddress);
             setDestCoord({ latitude: item.lat, longitude: item.lon });
             setDestSuggestions([]);
+            console.log(" Destination définie:", formattedAddress);
+        }
+    };
+
+    // Enregistrer le trajet avec toutes les informations
+    const saveTrajet = async (
+        name: string, 
+        startC: Coordonnees, 
+        destC: Coordonnees, 
+        dist: string, 
+        dur: string,
+        vehicleType: string = "",
+        price: string = "",
+        startAddress: string = "",
+        destinationAddress: string = ""
+    ) => {
+        try {
+            // S'assurer qu'on a des adresses valides
+            const finalStartAddress = startAddress || await getAddressFromCoords(startC);
+            const finalDestinationAddress = destinationAddress || await getAddressFromCoords(destC);
+            
+            const newTrajet: TrajetComplet = { 
+                id: Date.now(), 
+                name, 
+                startCoord: startC, 
+                destCoord: destC, 
+                distance: dist, 
+                duration: dur,
+                vehicleType,
+                price,
+                startAddress: finalStartAddress,
+                destinationAddress: finalDestinationAddress,
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log(" Tentative d'enregistrement:", newTrajet);
+            
+            const existing = await AsyncStorage.getItem("trajets");
+            const trajets: TrajetComplet[] = existing ? JSON.parse(existing) : [];
+            trajets.push(newTrajet);
+            await AsyncStorage.setItem("trajets", JSON.stringify(trajets));
+            
+            // Vérifier que l'enregistrement a fonctionné
+            const verify = await AsyncStorage.getItem("trajets");
+            console.log("Trajet enregistré avec succès. Stockage vérifié:", verify ? JSON.parse(verify).length : 0, "trajets");
+            
+        } catch (error) {
+            console.error(" Erreur lors de l'enregistrement du trajet:", error);
+            Alert.alert("Erreur", "Impossible d'enregistrer le trajet");
         }
     };
 
     // Tracer la route
-    const traceRoute = async (startC = startCoord, destC = destCoord) => {
-        if (!startC || !destC) return Alert.alert("Erreur", "Choisis le départ et la destination.");
+    const traceRoute = async (startC: Coordonnees | null = startCoord, destC: Coordonnees | null = destCoord) => {
+        if (!startC || !destC) {
+            Alert.alert("Erreur", "Choisis le départ et la destination.");
+            return;
+        }
+        
         try {
             setLoading(true);
+            console.log(" Début du traçage de la route...");
+            
             const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_API_KEY}&start=${startC.longitude},${startC.latitude}&end=${destC.longitude},${destC.latitude}`;
             const res = await fetch(url);
             const data = await res.json();
-            if (!data.features || data.features.length === 0) return Alert.alert("Aucun itinéraire trouvé");
+            
+            if (!data.features || data.features.length === 0) {
+                Alert.alert("Aucun itinéraire trouvé");
+                return;
+            }
 
-            const coords = data.features[0].geometry.coordinates.map((c: any) => ({
+            const coords: Coordonnees[] = data.features[0].geometry.coordinates.map((c: any) => ({
                 latitude: c[1],
                 longitude: c[0],
             }));
+            
             const summary = data.features[0].properties.summary;
             const dist = (summary.distance / 1000).toFixed(2) + " km";
             const dur = Math.ceil(summary.duration / 60) + " min";
@@ -239,10 +463,17 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
             setDistance(dist);
             setDuration(dur);
 
+            console.log(" Route tracée:", { distance: dist, duration: dur });
+
             mapRef.current?.fitToCoordinates(coords, {
                 edgePadding: { top: 100, right: 50, bottom: 200, left: 50 },
                 animated: true,
             });
+            
+            // Notifier que la route est prête
+            if (onRouteReady) {
+                onRouteReady();
+            }
             
             // Ouvrir le bottom sheet pour choisir le véhicule
             setTimeout(() => {
@@ -250,11 +481,17 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
                 bottomSheetRef.current?.expand();
             }, 500);
             
+            // Enregistrer le trajet de base seulement si ce n'est pas un trajet chargé
             if (!trajet) {
-                saveTrajet("Trajet", startC, destC, dist, dur);
+                await saveTrajet("Trajet", startC, destC, dist, dur, "", "", start, destination);
             }
         } catch (err) {
-            console.error(err);
+            console.error(" Erreur lors du traçage de la route:", err);
+            Alert.alert("Erreur", "Impossible de tracer l'itinéraire");
+            
+            if (onRouteReady) {
+                onRouteReady();
+            }
         } finally {
             setLoading(false);
             setShowForm(false);
@@ -262,49 +499,84 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
     };
 
     // Calculer le prix en fonction de la distance et du type de véhicule
-    const calculatePrice = (vehicle: any) => {
+    const calculatePrice = (vehicle: Vehicule): number => {
         if (!distance || !vehicle.prix_par_km) return 0;
         const distanceInKm = parseFloat(distance.split(' ')[0]);
         const pricePerKm = vehicle.prix_par_km || vehicle.pricePerKm;
         return Math.round(distanceInKm * pricePerKm);
     };
 
-    // Sélectionner un véhicule
-    const handleVehicleSelect = (vehicle: any) => {
+    // Sélectionner un véhicule - CORRIGÉ avec gestion robuste des adresses
+    const handleVehicleSelect = async (vehicle: Vehicule) => {
+        console.log("Sélection véhicule:", {
+            destination,
+            start,
+            destCoord,
+            startCoord
+        });
+        
         const price = calculatePrice(vehicle);
         setSelectedVehicle(vehicle);
         setCalculatedPrice(price);
         
-        // Rediriger vers la page de paiement après un court délai
-        setTimeout(() => {
-            router.push({
-                pathname: "/paiement",
-                params: {
-                    vehicleType: vehicle.name,
-                    price: price.toString(),
-                    distance: distance,
-                    duration: duration,
-                    start: start,
-                    destination: destination,
-                    startLat: startCoord.latitude.toString(),
-                    startLng: startCoord.longitude.toString(),
-                    destLat: destCoord.latitude.toString(),
-                    destLng: destCoord.longitude.toString()
-                }
+        try {
+            // S'assurer qu'on a les adresses complètes
+            const startAddressFinal = start || await getAddressFromCoords(startCoord!);
+            const destinationAddressFinal = destination || await getAddressFromCoords(destCoord!);
+            
+            console.log(" Adresses finales pour enregistrement:", {
+                start: startAddressFinal,
+                destination: destinationAddressFinal
             });
-        }, 500);
+            
+            // Enregistrer le trajet COMPLET avant la redirection
+            await saveTrajet(
+                "Trajet réservé", 
+                startCoord!, 
+                destCoord!, 
+                distance!, 
+                duration!,
+                vehicle.name,
+                price.toString(),
+                startAddressFinal,
+                destinationAddressFinal
+            );
+            
+            console.log(" Trajet enregistré, redirection vers paiement...");
+            
+            // Rediriger vers la page de paiement après un court délai
+            setTimeout(() => {
+                router.push({
+                    pathname: "/paiement",
+                    params: {
+                        vehicleType: vehicle.name,
+                        price: price.toString(),
+                        distance: distance,
+                        duration: duration,
+                        start: startAddressFinal,
+                        destination: destinationAddressFinal,
+                        startLat: startCoord!.latitude.toString(),
+                        startLng: startCoord!.longitude.toString(),
+                        destLat: destCoord!.latitude.toString(),
+                        destLng: destCoord!.longitude.toString()
+                    }
+                });
+            }, 500);
+            
+        } catch (error) {
+            console.error(" Erreur lors de la sélection du véhicule:", error);
+            Alert.alert("Erreur", "Impossible de finaliser la réservation");
+        }
     };
 
-    // Enregistrer le trajet
-    const saveTrajet = async (name: string, startC: any, destC: any, dist: any, dur: any) => {
-        const newTrajet = { id: Date.now(), name, startCoord: startC, destCoord: destC, distance: dist, duration: dur };
-        const existing = await AsyncStorage.getItem("trajets");
-        const trajets = existing ? JSON.parse(existing) : [];
-        trajets.push(newTrajet);
-        await AsyncStorage.setItem("trajets", JSON.stringify(trajets));
-    };
-
-    if (!currentLocation) return <ActivityIndicator style={{ flex: 1 }} size="large" color={primary} />;
+    if (!currentLocation) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={primary} />
+                <Text style={styles.loadingText}>Chargement de la carte...</Text>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
@@ -319,18 +591,25 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
                     longitudeDelta: 0.05,
                 }}
                 showsUserLocation
+                showsMyLocationButton
             >
                 {startCoord && (
                     <Marker coordinate={startCoord} title="Départ">
-                        <Ionicons name="location" size={32} color={primary} />
+                        <View style={styles.markerStart}>
+                            <Ionicons name="location" size={32} color={primary} />
+                        </View>
                     </Marker>
                 )}
                 {destCoord && (
                     <Marker coordinate={destCoord} title="Destination">
-                        <Ionicons name="location" size={30} color="#007AFF" />
+                        <View style={styles.markerDest}>
+                            <Ionicons name="navigate" size={30} color="#007AFF" />
+                        </View>
                     </Marker>
                 )}
-                {routeCoords.length > 0 && <Polyline coordinates={routeCoords} strokeWidth={6} strokeColor={primary} />}
+                {routeCoords.length > 0 && (
+                    <Polyline coordinates={routeCoords} strokeWidth={6} strokeColor={primary} />
+                )}
             </MapView> 
 
             {!showForm && !trajet && (
@@ -342,33 +621,50 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
             {showForm && (
                 <View style={styles.searchContainer}>
                     <View style={styles.headerForm}>
-                        <Text style={{ fontWeight: "bold", fontSize: 16 }}>Réserver un trajet</Text>
+                        <Text style={styles.headerTitle}>Réserver un trajet</Text>
                         <TouchableOpacity onPress={() => setShowForm(false)}>
                             <Ionicons name="close" size={24} color="black" />
                         </TouchableOpacity>
                     </View>
 
-                    <TextInput
-                        placeholder="Départ"
-                        value={start}
-                        style={styles.input}
-                        onChangeText={(text) => {
-                            setStart(text);
-                            fetchSuggestions(text, "start");
-                        }}
-                    />
+                    <View style={styles.inputContainer}>
+                        <Ionicons name="location" size={20} color={primary} style={styles.inputIcon} />
+                        <TextInput
+                            placeholder="Départ"
+                            value={start}
+                            style={styles.input}
+                            onChangeText={(text) => {
+                                setStart(text);
+                                fetchSuggestions(text, "start");
+                            }}
+                            placeholderTextColor="#999"
+                        />
+                    </View>
                     {startSuggestions.length > 0 && (
                         <FlatList
                             data={startSuggestions}
                             keyExtractor={(item, i) => i.toString()}
                             renderItem={({ item }) => (
-                                <TouchableOpacity onPress={() => selectSuggestion(item, "start")} style={styles.suggestionItem}>
-                                    <Text>{item.name} {item.city || ""}</Text>
+                                <TouchableOpacity 
+                                    onPress={() => selectSuggestion(item, "start")} 
+                                    style={styles.suggestionItem}
+                                >
+                                    <Ionicons name="location-outline" size={16} color="#666" />
+                                    <View style={styles.suggestionTextContainer}>
+                                        <Text style={styles.suggestionName}>{item.name}</Text>
+                                        {item.city && (
+                                            <Text style={styles.suggestionCity}>{item.city}</Text>
+                                        )}
+                                    </View>
                                 </TouchableOpacity>
                             )}
+                            style={styles.suggestionsList}
+                            showsVerticalScrollIndicator={false}
                         />
                     )}
 
+                  <View style={styles.inputContainer}>
+                    <Ionicons name="navigate" size={20} color={primary} style={styles.inputIcon} />
                     <TextInput
                         placeholder="Destination"
                         value={destination}
@@ -377,25 +673,61 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
                             setDestination(text);
                             fetchSuggestions(text, "dest");
                         }}
+                        placeholderTextColor="#999"
                     />
+                    {destination.length > 0 && (
+                        <TouchableOpacity 
+                            onPress={() => {
+                                setDestination("");
+                                setDestSuggestions([]);
+                            }}
+                            style={styles.clearButton}
+                        >
+                            <Ionicons name="close-circle" size={20} color="#999" />
+                        </TouchableOpacity>
+                    )}
+                </View>
                     {destSuggestions.length > 0 && (
                         <FlatList
                             data={destSuggestions}
                             keyExtractor={(item, i) => i.toString()}
                             renderItem={({ item }) => (
-                                <TouchableOpacity onPress={() => selectSuggestion(item, "dest")} style={styles.suggestionItem}>
-                                    <Text>{item.name} {item.city || ""}</Text>
+                                <TouchableOpacity 
+                                    onPress={() => selectSuggestion(item, "dest")} 
+                                    style={styles.suggestionItem}
+                                >
+                                    <Ionicons name="location-outline" size={16} color="#666" />
+                                    <View style={styles.suggestionTextContainer}>
+                                        <Text style={styles.suggestionName}>{item.name}</Text>
+                                        {item.city && (
+                                            <Text style={styles.suggestionCity}>{item.city}</Text>
+                                        )}
+                                    </View>
                                 </TouchableOpacity>
                             )}
+                            style={styles.suggestionsList}
+                            showsVerticalScrollIndicator={false}
                         />
                     )}
 
-                    <TouchableOpacity style={styles.button} onPress={() => traceRoute()} disabled={loading}>
-                        <Text style={styles.btnText}>{loading ? "chargement..." : "Suivant"}</Text>
+                    <TouchableOpacity 
+                        style={[styles.button, loading && styles.buttonDisabled]} 
+                        onPress={() => traceRoute()} 
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <ActivityIndicator size="small" color={primary} />
+                        ) : (
+                            <Text style={styles.btnText}>Suivant</Text>
+                        )}
                     </TouchableOpacity>
  
                     {distance && duration && (
-                        <Text style={styles.infoText}>Distance : {distance} | Durée : {duration}</Text>
+                        <View style={styles.routeInfoContainer}>
+                            <Text style={styles.infoText}>
+                              Distance : {distance} • Temps estimé : {duration}
+                            </Text>
+                        </View>
                     )}
                 </View>
             )}
@@ -408,6 +740,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
                 enablePanDownToClose={true}
                 onClose={() => setShowVehicleSheet(false)}
                 backgroundStyle={styles.bottomSheetBackground}
+                handleStyle={styles.bottomSheetHandle}
             >
                 <BottomSheetView style={styles.bottomSheetContent}>
                     <View style={styles.bottomSheetHeader}>
@@ -419,12 +752,17 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
 
                     {distance && duration && (
                         <View style={styles.routeInfo}>
-                            <Text style={styles.routeInfoText}>Distance: {distance}</Text>
-                            <Text style={styles.routeInfoText}>Durée: {duration}</Text>
+                            <View style={styles.routeInfoItem}>
+                                <Ionicons name="speedometer" size={16} color="#666" />
+                                <Text style={styles.routeInfoText}>Distance: {distance}</Text>
+                            </View>
+                            <View style={styles.routeInfoItem}>
+                                <Ionicons name="time" size={16} color="#666" />
+                                <Text style={styles.routeInfoText}>Durée: {duration}</Text>
+                            </View>
                         </View>
                     )}
 
-                    {/* UNE SEULE FlatList avec les tarifs transformés */}
                     <FlatList
                         data={transformedTarifs}
                         keyExtractor={(item) => item.id.toString()}
@@ -439,19 +777,21 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
                                     onPress={() => handleVehicleSelect(item)}
                                 >
                                     <View style={styles.vehicleInfo}>
-                                        <Ionicons name={item.icon as any} size={24} color={primary} />
+                                        <Ionicons name={item.icon as any} size={28} color={primary} />
                                         <View style={styles.vehicleDetails}>
                                             <Text style={styles.vehicleName}>{item.name}</Text>
                                             <Text style={styles.vehicleDescription}>{item.description}</Text>
                                         </View>
                                     </View>
                                     <View style={styles.priceContainer}>
-                                        <Text style={styles.priceText}>{price} GNF</Text>
-                                        <Text style={styles.priceDetail}>({item.prix_par_km} GNF/km)</Text>
+                                        <Text style={styles.priceText}>{price.toLocaleString()} GNF</Text>
+                                        <Text style={styles.priceDetail}>{item.prix_par_km} GNF/km</Text>
                                     </View>
                                 </TouchableOpacity>
                             );
                         }}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={styles.vehicleListContent}
                     />
                 </BottomSheetView>
             </BottomSheet> 
@@ -459,96 +799,230 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng 
     );
 }
 
-// Gardez les styles existants...
 const styles = StyleSheet.create({
-    container: { flex: 1 },
-    map: { flex: 1 },
+    container: { 
+        flex: 1,
+        backgroundColor: '#fff'
+    },
+    map: { 
+        flex: 1 
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff'
+    },
+    loadingText: {
+        marginTop: 16,
+        fontSize: 16,
+        color: '#666',
+        fontWeight: '500'
+    },
     searchContainer: {
         position: "absolute",
-        top: 30,
-        left: 10,
-        right: 10,
+        top: 50,
+        left: 16,
+        right: 16,
         backgroundColor: "#fff",
-        borderRadius: 10,
-        padding: 10,
-        elevation: 6,
+        borderRadius: 16,
+        padding: 20,
+        elevation: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
         zIndex: 10,
     },
     headerForm: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 8,
+        marginBottom: 20,
+        paddingBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#f0f0f0",
+    },
+    headerTitle: {
+        fontWeight: "bold", 
+        fontSize: 18,
+        color: '#333'
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: "#f8f9fa",
+        borderRadius: 12,
+        marginBottom: 12,
+        paddingHorizontal: 16,
+        borderWidth: 1,
+        borderColor: "#e9ecef",
+    },
+    inputIcon: {
+        marginRight: 12,
     },
     input: {
-        backgroundColor: "#f2f2f2",
-        borderRadius: 8,
-        padding: 8,
-        marginBottom: 6,
+        flex: 1,
+        paddingVertical: 14,
+        fontSize: 16,
+        color: '#333',
     },
     suggestionItem: {
-        padding: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 14,
         borderBottomWidth: 1,
-        borderColor: "#ddd",
+        borderColor: "#f8f9fa",
+        backgroundColor: '#fff',
+    },
+    suggestionTextContainer: {
+        marginLeft: 12,
+        flex: 1,
+    },
+    suggestionName: {
+        fontSize: 15,
+        fontWeight: '500',
+        color: '#333',
+        marginBottom: 2,
+    },
+    suggestionCity: {
+        fontSize: 13,
+        color: '#666',
+    },
+    suggestionsList: {
+        maxHeight: 200,
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+        elevation: 2,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
     },
     button: {
         backgroundColor: primary,
-        padding: 12,
-        borderRadius: 8,
+        padding: 16,
+        borderRadius: 12,
         alignItems: "center",
-        marginTop: 6,
-    },
-    btnText: { color: "#fff", fontWeight: "bold" },
-    infoText: {
         marginTop: 8,
-        fontSize: 16,
+        elevation: 2,
+        shadowColor: primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+    },
+    buttonDisabled: {
+        backgroundColor: "#ccc",
+        shadowOpacity: 0,
+    },
+    btnText: { 
+        color: "#fff", 
         fontWeight: "bold",
+        fontSize: 16
+    },
+    routeInfoContainer: {
+        marginTop: 16,
+        padding: 12,
+        backgroundColor: '#e8f5e8',
+        borderRadius: 8,
+        borderLeftWidth: 4,
+        borderLeftColor: '#4caf50',
+    },
+    infoText: {
+        fontSize: 14,
+        fontWeight: "600",
         textAlign: "center",
+        color: '#2e7d32'
     },
     addButton: {
         position: "absolute",
         bottom: 30,
         right: 20,
         backgroundColor: primary,
-        width: 55,
-        height: 55,
+        width: 60,
+        height: 60,
         borderRadius: 30,
         alignItems: "center",
         justifyContent: "center",
         elevation: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
         zIndex: 10,
+    },
+    markerStart: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+    },
+    markerDest: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
     },
     bottomSheetBackground: {
         backgroundColor: "#fff",
-        borderRadius: 20,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 16,
+    },
+    bottomSheetHandle: {
+        backgroundColor: '#e0e0e0',
+        width: 40,
+        height: 4,
+        borderRadius: 2,
+        alignSelf: 'center',
+        marginTop: 8,
     },
     bottomSheetContent: {
         flex: 1,
-        padding: 16,
+        padding: 20,
     },
     bottomSheetHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 16,
+        marginBottom: 20,
+        paddingBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#f0f0f0",
     },
     bottomSheetTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: "bold",
         color: "#333",
     },
     routeInfo: {
         flexDirection: "row",
         justifyContent: "space-between",
-        backgroundColor: "#f8f8f8",
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 16,
+        backgroundColor: "#f8f9fa",
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: "#e9ecef",
+    },
+    routeInfoItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     routeInfoText: {
         fontSize: 14,
         fontWeight: "600",
         color: "#666",
+        marginLeft: 6,
+    },
+    vehicleListContent: {
+        paddingBottom: 20,
     },
     vehicleItem: {
         flexDirection: "row",
@@ -557,13 +1031,17 @@ const styles = StyleSheet.create({
         padding: 16,
         borderBottomWidth: 1,
         borderBottomColor: "#f0f0f0",
-        borderRadius: 8,
+        borderRadius: 12,
         marginBottom: 8,
+        backgroundColor: '#fafafa',
+        borderWidth: 1,
+        borderColor: '#f0f0f0',
     },
     selectedVehicleItem: {
         backgroundColor: "#FFF5F2",
         borderColor: primary,
-        borderWidth: 1,
+        borderWidth: 2,
+        transform: [{ scale: 1.02 }],
     },
     vehicleInfo: {
         flexDirection: "row",
@@ -572,28 +1050,36 @@ const styles = StyleSheet.create({
     },
     vehicleDetails: {
         marginLeft: 12,
+        flex: 1,
     },
     vehicleName: {
         fontSize: 16,
         fontWeight: "bold",
         color: "#333",
+        marginBottom: 2,
     },
     vehicleDescription: {
         fontSize: 12,
         color: "#666",
-        marginTop: 2,
+        lineHeight: 16,
     },
     priceContainer: {
         alignItems: "flex-end",
+        marginLeft: 8,
     },
     priceText: {
         fontSize: 16,
         fontWeight: "bold",
         color: primary,
+        marginBottom: 2,
     },
     priceDetail: {
         fontSize: 10,
         color: "#666",
-        marginTop: 2,
+        fontWeight: '500',
+    },
+    clearButton: {
+        padding: 4,
+        marginLeft: 8,
     },
 });

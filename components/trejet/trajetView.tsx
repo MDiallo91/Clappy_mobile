@@ -34,6 +34,7 @@ export default function TrajetScreen() {
     const fetchTrajets = async () => {
       const data = await AsyncStorage.getItem("trajets");
       if (data) setTrajets(JSON.parse(data));
+      console.log("les donnee enregister dans le storage",data)
     };
     fetchTrajets();
   }, []);
@@ -96,7 +97,7 @@ export default function TrajetScreen() {
               >
                 <Text style={styles.itemTitle}>{item.name}</Text>
                 <Text style={styles.itemSub}>
-                  Distance : {item.distance} | Durée : {item.duration}
+                  Distance : {item.distance} | Destination : {item.destinationAddress}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => deleteTrajet(item.id)}>

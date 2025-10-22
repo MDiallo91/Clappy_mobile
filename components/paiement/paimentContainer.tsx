@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import PaiementView from './paiementView';
 import CoursService from '@/services/coursService';
+import ConfirmeAlert from './confirmeAlert';
 
 interface CourseData {
   vehicleType: string;
@@ -24,6 +25,8 @@ function PaimentContainer() {
   
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [courseResult, setCourseResult] = useState<any>(null);
 
   // Préparer les données de la course depuis les params
   const courseData: CourseData = {
@@ -49,12 +52,12 @@ function PaimentContainer() {
 
     setLoading(true);
     try {
-      console.log('📤 Envoi de la course au backend:', courseData);
+      console.log('Envoi de la course au backend:', courseData);
 
       const courseToSend = {
         client: 1, // À remplacer par l'ID du client connecté
         adresse_depart: courseData.start,
-        adresse_arrivee: courseData.destination,
+        adresse_destination: courseData.destination,
         tarif_estime: courseData.price,
         methode_paiement: selectedPaymentMethod,
         statut: 'demandee',
@@ -62,8 +65,8 @@ function PaimentContainer() {
         // Coordonnées GPS si votre backend les accepte
         latitude_depart: parseFloat(courseData.startLat),
         longitude_depart: parseFloat(courseData.startLng),
-        latitude_arrivee: parseFloat(courseData.destLat),
-        longitude_arrivee: parseFloat(courseData.destLng),
+        latitude_destination: parseFloat(courseData.destLat),
+        longitude_destination: parseFloat(courseData.destLng),
       };
 
       const result = await CoursService.addCourse(courseToSend);
@@ -72,38 +75,44 @@ function PaimentContainer() {
       console.log("📦 Données reçues:", result.data);
 
       if (result.status === 201 || result.status === 200) {
-        // Rediriger vers l'écran de confirmation
-        // router.push({
-        //   pathname: "/confirmation",
-        //   params: {
-        //     courseId: result.data.id,
-        //     vehicleType: courseData.vehicleType,
-        //     price: courseData.price.toString(),
-        //     distance: courseData.distance,
-        //     paymentMethod: selectedPaymentMethod
-        //   }
-        // });
+        // Afficher la modal de confirmation
+        setCourseResult(result);
+        setShowConfirmation(true);
       } else {
         alert(`Erreur: ${result.message}`);
       }
 
     } catch (error: any) {
-      console.error('❌ Erreur création course:', error);
+      console.error(' Erreur création course:', error);
       alert('Erreur lors de la création de la course: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Passer toutes les données et fonctions à la View
+  // Fonction pour fermer la confirmation et rediriger
+  const handleCloseConfirmation = () => {
+    setShowConfirmation(false);
+    // Rediriger vers l'écran d'accueil ou de suivi de course
+    router.push('/');
+  };
+
   return (
-    <PaiementView
-      courseData={courseData}
-      selectedPaymentMethod={selectedPaymentMethod}
-      onPaymentMethodSelect={setSelectedPaymentMethod}
-      onPayment={handleCreateCourse}
-      loading={loading}
-    />
+    <>
+      <PaiementView
+        courseData={courseData}
+        selectedPaymentMethod={selectedPaymentMethod}
+        onPaymentMethodSelect={setSelectedPaymentMethod}
+        onPayment={handleCreateCourse}
+        loading={loading}
+      />
+      
+      <ConfirmeAlert 
+        visible={showConfirmation}
+        onClose={handleCloseConfirmation}
+        message="Votre course a été réservée avec succès ! Un chauffeur sera assigné dans quelques instants."
+      />
+    </>
   );
 }
 
