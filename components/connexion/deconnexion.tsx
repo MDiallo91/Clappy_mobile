@@ -18,7 +18,7 @@ interface LogoutModalProps {
 export default function LogoutModal({ visible, onClose }: LogoutModalProps) {
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem("auth_token");
+      await AsyncStorage.removeItem("dataUser");
       console.log("Token supprimé ✅");
       onClose();
       router.replace("/connexion");

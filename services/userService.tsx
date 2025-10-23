@@ -27,7 +27,7 @@ static async login(utilisateur: { username: string; password: string }) {
 
     console.log("Réponse login:", data);
 
-    if (data.access) {
+    if (data) {
       await AsyncStorage.setItem("auth_token", data.access);
        await AsyncStorage.setItem("userData", JSON.stringify(data));
     }
