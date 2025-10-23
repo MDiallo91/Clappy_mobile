@@ -26,21 +26,7 @@ export default function PayementView({ onScan }: Props) {
         </TouchableOpacity>
       </View>
 
-      {/* Barre de navigation */}
-      <View style={styles.bottomNav}>
-        <View style={styles.navItem}>
-          <Ionicons name="home-outline" size={24} color="black" />
-          <Text style={styles.navText}>Accueil</Text>
-        </View>
-        <View style={styles.navItem}>
-          <Ionicons name="card-outline" size={24} color="black" />
-          <Text style={styles.navText}>Payement</Text>
-        </View>
-        <View style={styles.navItem}>
-          <Ionicons name="person-outline" size={24} color="black" />
-          <Text style={styles.navText}>Compte</Text>
-        </View>
-      </View>
+    
     </SafeAreaView>
   );
 }

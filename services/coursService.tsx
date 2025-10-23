@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BASE_URL =  'http://192.168.1.167:8000//api/';
-
 export default class CoursService {
 
 static async addCourse(course: any): Promise<{ data: any; status: number; message: string }> {
@@ -52,6 +51,33 @@ static async addCourse(course: any): Promise<{ data: any; status: number; messag
   }
 }
 
+//Recuperation de course en attentes pour les envoyer aux chauffeurs
+static async getCourses(): Promise<any[]> {
+  try {
+    // Récupérer le token stocké
+          const token = await AsyncStorage.getItem("auth_token");
+    
+    const response = await fetch(`${BASE_URL}courses/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Ajout du token
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP! statut: ${response.status}`);
+    }
+
+    const courses = await response.json();
+    console.log('courses récupérés:', courses.results);
+    return courses.results;
+
+  } catch (error) {
+    console.error('Erreur de connexion:', error);
+    throw error;
+  }
+}
 
 
   

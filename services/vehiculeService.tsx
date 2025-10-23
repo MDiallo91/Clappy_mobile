@@ -5,7 +5,7 @@ const BASE_URL = 'http://192.168.1.167:8000/api/';
 
 export default class VehiculeService {
 
-    static async getTarif(): Promise<any[]> {
+  static async getTarif(): Promise<any[]> {
   try {
     // Récupérer le token stocké
     const token = await AsyncStorage.getItem("auth_token");

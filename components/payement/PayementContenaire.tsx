@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PayementView from "./PayementView";
 
 export default function PayementContenaire() {
@@ -6,6 +6,8 @@ export default function PayementContenaire() {
   const handleScan = () => {
     console.log("🔍 Scanner le code QR");
   };
+
+
 
   return <PayementView onScan={handleScan} />;
 }

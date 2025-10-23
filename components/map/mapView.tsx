@@ -74,7 +74,7 @@ interface Suggestion {
 // Fonction pour obtenir l'adresse à partir des coordonnées
 const getAddressFromCoords = async (coords: Coordonnees): Promise<string> => {
     try {
-        console.log("📍 Reverse geocoding pour:", coords);
+        console.log(" Reverse geocoding pour:", coords);
         const addresses = await Location.reverseGeocodeAsync({
             latitude: coords.latitude,
             longitude: coords.longitude
