@@ -17,6 +17,7 @@ interface CourseData {
   destLat: string;
   destLng: string;
   paymentMethod: string;
+  vehiculeId: string;
 }
 
 function PaimentContainer() {
@@ -40,6 +41,7 @@ function PaimentContainer() {
     startLng: params.startLng as string,
     destLat: params.destLat as string,
     destLng: params.destLng as string,
+    vehiculeId: params.vehicleId as string,
     paymentMethod: selectedPaymentMethod
   };
 
@@ -61,13 +63,16 @@ function PaimentContainer() {
         tarif_estime: courseData.price,
         methode_paiement: selectedPaymentMethod,
         statut: 'demandee',
-        notes: `Véhicule: ${courseData.vehicleType}, Distance: ${courseData.distance}`,
-        // Coordonnées GPS si votre backend les accepte
+        type_vehicule_demande: courseData.vehicleType, // 
+        // notes: `Véhicule: ${courseData.vehicleType}, Distance: ${courseData.distance}`,
+        // Coordonnées GPS
         latitude_depart: parseFloat(courseData.startLat),
         longitude_depart: parseFloat(courseData.startLng),
         latitude_destination: parseFloat(courseData.destLat),
         longitude_destination: parseFloat(courseData.destLng),
       };
+
+      console.log('Données envoyées au backend:', courseToSend);
 
       const result = await CoursService.addCourse(courseToSend);
       

@@ -1,3 +1,4 @@
+// ConnexionContenaire.tsx - CORRIGÉ
 import React, { useState } from "react";
 import ConnexionView from "./ConnexionView";
 import UtilisateurService from "@/services/userService";
@@ -20,39 +21,49 @@ function ConnexionContenaire() {
   });
 
   const onSubmit = async (data: any) => {
-  setLoading(true);
-  console.log("Informations saisies :", data);
+    setLoading(true);
+    console.log("Informations saisies :", data);
 
-  // 🔹 Transformer email en username
-  const utilisateur = {
-    username: data.email.trim(),
-    password: data.password,
-  };
+    // Transformer email en username
+    const utilisateur = {
+      username: data.email.trim(),
+      password: data.password,
+    };
 
-  try {
-    const { status } = await UtilisateurService.login(utilisateur);
-    console.log("Le statut", status);
+    try {
+      // ✅ CORRECTION : Attendre le résultat complet
+      const result = await UtilisateurService.login(utilisateur);
+      console.log("Résultat login:", result);
 
-    if (status === 200) {
+      if (result.status === 'success') {
+        Toast.show({
+          type: "success",
+          text1: "Connexion réussie 🎉",
+          text2: "Bienvenue sur votre compte !",
+        });
+        router.push("/");
+      }
+    } catch (err: any) {
+      console.error("Erreur détaillée:", err);
+      
+      // CORRECTION : Message d'erreur plus spécifique
+      let errorMessage = "Email ou mot de passe incorrect.";
+      
+      if (err.message.includes("401") || err.message.includes("Authentication")) {
+        errorMessage = "Identifiants incorrects. Vérifiez votre nom d'utilisateur et mot de passe.";
+      } else if (err.message.includes("Network")) {
+        errorMessage = "Problème de connexion. Vérifiez votre internet.";
+      }
+      
       Toast.show({
-        type: "success",
-        text1: "Connexion réussie 🎉",
-        text2: "Bienvenue sur votre compte !",
+        type: "error",
+        text1: "Erreur de connexion",
+        text2: errorMessage,
       });
-      router.push("/");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    Toast.show({
-      type: "error",
-      text1: "Erreur de connexion",
-      text2: "Email ou mot de passe incorrect.",
-    });
-  } finally {
-    //  router.push("/");
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
     <ConnexionView

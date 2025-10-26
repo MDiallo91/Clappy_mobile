@@ -198,17 +198,17 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
         })();
     }, []);
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const users = await UtilisateurService.getUsers();
-                setUser(users);
-            } catch (error) {
-                console.error("Erreur lors de la récupération des users:", error);
-            }
-        };
-        fetchUsers();
-    }, []);
+    // useEffect(() => {
+    //     const fetchUsers = async () => {
+    //         try {
+    //             const users = await UtilisateurService.getUsers();
+    //             setUser(users);
+    //         } catch (error) {
+    //             console.error("Erreur lors de la récupération des users:", error);
+    //         }
+    //     };
+    //     fetchUsers();
+    // }, []);
 
     // Récupération et transformation des tarifs
     useEffect(() => {
@@ -222,7 +222,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                     let iconName = "car-outline";
                     let displayName = item.type_vehicule;
                     let description = "Véhicule standard";
-
+                    console.log("Recuperation des donnee de vehicule pour voir",item)
                     switch(item.type_vehicule.toLowerCase()) {
                         case "economique":
                             iconName = "car-outline";
@@ -278,6 +278,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
 
                     return {
                         id: item.id,
+                        nom:item.type_vehicule,
                         icon: iconName,
                         name: displayName,
                         description: description,
@@ -549,7 +550,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                 router.push({
                     pathname: "/paiement",
                     params: {
-                        vehicleType: vehicle.name,
+                        vehicleType: vehicle.type_vehicule,
                         price: price.toString(),
                         distance: distance,
                         duration: duration,
@@ -795,6 +796,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                     />
                 </BottomSheetView>
             </BottomSheet> 
+   
         </View>
     );
 }
