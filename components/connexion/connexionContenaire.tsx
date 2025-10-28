@@ -1,4 +1,3 @@
-// ConnexionContenaire.tsx - CORRIGÉ
 import React, { useState } from "react";
 import ConnexionView from "./ConnexionView";
 import UtilisateurService from "@/services/userService";

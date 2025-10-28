@@ -16,9 +16,7 @@ class WebSocketService {
     private readonly maxReconnectAttempts: number = 5;
     private onCourseCallback: ((data: WebSocketMessage) => void) | null = null;
     private onConfirmationCallback: ((data: WebSocketMessage) => void) | null = null;
-    private reconnectTimeout: number | null = null;
-    private onNotificationCallback: ((data: WebSocketMessage) => void) | null = null;
-    private onAlertCallback: ((data: WebSocketMessage) => void) | null = null;
+    private reconnectTimeout: NodeJS.Timeout | null = null;
 
     constructor() {
         this.socket = null;
@@ -27,8 +25,6 @@ class WebSocketService {
         this.onCourseCallback = null;
         this.onConfirmationCallback = null;
         this.reconnectTimeout = null;
-        this.onNotificationCallback = null;
-        this.onAlertCallback = null;
     }
 
     connect(token: string): void {
@@ -80,20 +76,14 @@ class WebSocketService {
                 if (this.onCourseCallback) {
                     this.onCourseCallback(data);
                 }
-                // ✅ Pour React Native, on utilise des callbacks au lieu de DOM
-                if (this.onNotificationCallback) {
-                    this.onNotificationCallback(data);
-                }
+                this.showNotification(data);
                 break;
 
             case 'course_confirmed':
                 if (this.onConfirmationCallback) {
                     this.onConfirmationCallback(data);
                 }
-                // ✅ Pour React Native, on utilise des callbacks
-                if (this.onAlertCallback) {
-                    this.onAlertCallback(data);
-                }
+                this.showConfirmationAlert(data);
                 break;
 
             case 'connection_success':
@@ -105,41 +95,134 @@ class WebSocketService {
         }
     }
 
-    // ✅ SUPPRIMÉ: Les méthodes avec document.createElement (incompatibles React Native)
-    // private showNotification(courseData: WebSocketMessage): void { ... }
-    // private showInAppNotification(courseData: WebSocketMessage): void { ... }
-    // private showConfirmationAlert(data: WebSocketMessage): void { ... }
+    private showNotification(courseData: WebSocketMessage): void {
+        // Notification système du navigateur
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('🚗 Nouvelle Course Disponible', {
+                body: `${courseData.depart} → ${courseData.destination}\n💰 ${courseData.tarif_estime} GNF`,
+                icon: '/icon.png',
+                tag: `course-${courseData.course_id}`
+            });
+        }
+
+        // Notification dans l'application
+        this.showInAppNotification(courseData);
+    }
+
+    private showInAppNotification(courseData: WebSocketMessage): void {
+        // Créer une notification dans l'UI
+        const notification = document.createElement('div');
+        notification.className = 'course-notification-alert';
+        notification.innerHTML = `
+            <div class="notification-content">
+                <div class="notification-header">
+                    <span class="icon">🚗</span>
+                    <h4>Nouvelle Course</h4>
+                    <button class="close-btn">&times;</button>
+                </div>
+                <div class="course-info">
+                    <p><strong>📍 Départ:</strong> ${courseData.depart}</p>
+                    <p><strong>🎯 Destination:</strong> ${courseData.destination}</p>
+                    <p><strong>💰 Tarif:</strong> ${courseData.tarif_estime} GNF</p>
+                    <p><strong>🚙 Type:</strong> ${courseData.type_vehicule}</p>
+                </div>
+                <div class="notification-actions">
+                    <button class="btn-accept" data-course-id="${courseData.course_id}">
+                        ✅ Accepter
+                    </button>
+                    <button class="btn-ignore">
+                        ❌ Ignorer
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Ajouter les event listeners
+        const closeBtn = notification.querySelector('.close-btn');
+        const acceptBtn = notification.querySelector('.btn-accept');
+        const ignoreBtn = notification.querySelector('.btn-ignore');
+
+        closeBtn?.addEventListener('click', () => notification.remove());
+        ignoreBtn?.addEventListener('click', () => notification.remove());
+        acceptBtn?.addEventListener('click', () => {
+            const courseId = acceptBtn.getAttribute('data-course-id');
+            if (courseId) {
+                this.acceptCourse(parseInt(courseId));
+            }
+            notification.remove();
+        });
+
+        document.body.appendChild(notification);
+
+        // Auto-suppression après 10 secondes
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 10000);
+    }
+
+    private showConfirmationAlert(data: WebSocketMessage): void {
+        // Alerte quand une course est prise par un autre chauffeur
+        const alert = document.createElement('div');
+        alert.className = 'confirmation-alert';
+        alert.innerHTML = `
+            <div class="alert-content">
+                <span class="icon">ℹ️</span>
+                <span>${data.message} - ${data.chauffeur_name}</span>
+            </div>
+        `;
+
+        document.body.appendChild(alert);
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+    }
 
     private handleReconnection(token: string): void {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
             console.log(`🔄 Tentative de reconnexion ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
             
-            this.reconnectTimeout = setTimeout(() => {
-                this.connect(token);
-            }, 3000 * this.reconnectAttempts); // Backoff exponentiel
+            // this.reconnectTimeout = setTimeout(() => {
+            //     this.connect(token);
+            // }, 3000 * this.reconnectAttempts); // Backoff exponentiel
         } else {
-            console.error('❌ Échec de reconnexion après plusieurs tentatives');
+            console.error(' Échec de reconnexion après plusieurs tentatives');
         }
     }
 
     private async acceptCourse(courseId: number): Promise<void> {
         try {
-            // ✅ Pour React Native, utilisez AsyncStorage ou passez le token en paramètre
-            // Vous devrez passer le token et chauffeurId depuis votre composant React Native
-            console.log('📝 Acceptation de course:', courseId);
+            const token = localStorage.getItem('authToken');
+            const chauffeurId = localStorage.getItem('chauffeurId');
             
-            // Cette méthode sera appelée depuis votre composant React Native
-            // avec les données d'authentification
+            const response = await fetch(`http://192.168.1.167:8000/api/courses/${courseId}/confirmer_par_chauffeur/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    chauffeur_id: chauffeurId
+                })
+            });
+
+            if (response.ok) {
+                console.log('✅ Course acceptée avec succès');
+            } else {
+                console.error('❌ Erreur lors de l\'acceptation');
+            }
         } catch (error) {
             console.error('❌ Erreur:', error);
         }
     }
 
     disconnect(): void {
-        if (this.reconnectTimeout !== null) {
+        if (this.reconnectTimeout) {
             clearTimeout(this.reconnectTimeout);
-            this.reconnectTimeout = null;
         }
         
         if (this.socket) {
@@ -158,48 +241,12 @@ class WebSocketService {
         this.onConfirmationCallback = callback;
     }
 
-    // ✅ NOUVELLES MÉTHODES POUR REACT NATIVE
-    onNotification(callback: (data: WebSocketMessage) => void): void {
-        this.onNotificationCallback = callback;
-    }
-
-    onAlert(callback: (data: WebSocketMessage) => void): void {
-        this.onAlertCallback = callback;
-    }
-
     // Getter pour le statut de connexion
     getConnectionStatus(): boolean {
         return this.isConnected;
     }
-
-    // ✅ MÉTHODE POUR ACCEPTER UNE COURSE (à appeler depuis React Native)
-    async acceptCourseFromApp(courseId: number, authToken: string, chauffeurId: string): Promise<boolean> {
-        try {
-            const response = await fetch(`http://192.168.1.167:8000/api/courses/${courseId}/confirmer_par_chauffeur/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authToken}`
-                },
-                body: JSON.stringify({
-                    chauffeur_id: chauffeurId
-                })
-            });
-
-            if (response.ok) {
-                console.log('✅ Course acceptée avec succès');
-                return true;
-            } else {
-                console.error('❌ Erreur lors de l\'acceptation');
-                return false;
-            }
-        } catch (error) {
-            console.error('❌ Erreur:', error);
-            return false;
-        }
-    }
 }
 
 // Instance globale
-const WebSocketServices = new WebSocketService();
-export default WebSocketServices;
+const webSocketService = new WebSocketService();
+export default webSocketService;

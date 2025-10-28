@@ -3,6 +3,12 @@ import ReservationView from "./chauffeurView";
 import Toast from "react-native-toast-message";
 import { router } from "expo-router";
 import CoursService from "@/services/coursService";
+import { ActivityIndicator, View, Text, StyleSheet } from "react-native";
+
+
+  const primary = "#EE6841";
+
+
 
 // Interface basée sur votre API
 interface ApiReservation {
@@ -35,13 +41,16 @@ interface ApiReservation {
 
 export default function ReservationContenaire() {
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true); // Nouvel état pour le chargement des données
   const [reservations, setReservations] = useState<ApiReservation[]>([]);
   const [selectedReservation, setSelectedReservation] = useState<ApiReservation | null>(null);
+
 
   // Récupération des courses en attente
   useEffect(() => {
     const fetchCourses = async () => {
       try {
+        setDataLoading(true);
         const coursesData = await CoursService.getCourses();
         console.log("Données reçues de l'API:", coursesData);
         
@@ -62,6 +71,8 @@ export default function ReservationContenaire() {
           text1: "Erreur",
           text2: "Impossible de charger les réservations",
         });
+      } finally {
+        setDataLoading(false);
       }
     };
     
@@ -99,6 +110,16 @@ export default function ReservationContenaire() {
     }
   };
 
+  // Afficher le loader pendant le chargement des données
+  if (dataLoading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color={primary} />
+        <Text style={styles.loaderText}>Chargement des réservations...</Text>
+      </View>
+    );
+  }
+
   return (
     <ReservationView
       reservations={reservations}
@@ -109,3 +130,17 @@ export default function ReservationContenaire() {
     />
   );
 }
+
+const styles = StyleSheet.create({
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+  loaderText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "black"
+  },
+});

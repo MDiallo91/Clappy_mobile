@@ -68,6 +68,8 @@ export default function TabLayout() {
         options={{
           title: 'Trajet',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          href: !isAdmin ? undefined : null, //  null = masqué de la tab bar
+
         }}
       />
       <Tabs.Screen

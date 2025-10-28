@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BASE_URL =  'http://192.168.1.167:8000/api/';
+const BASE_URL =  process.env.EXPO_PUBLIC_API_URL;
 export default class CoursService {
 
 static async addCourse(course: any): Promise<{ data: any; status: number; message: string }> {

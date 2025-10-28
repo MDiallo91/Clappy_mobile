@@ -9,8 +9,9 @@ import {
   FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
-// Interface basée sur votre API
+// Interface basée sur  API
 interface ApiReservation {
   id: number;
   adresse_depart: string;
@@ -44,7 +45,7 @@ interface Props {
   selectedReservation: ApiReservation | null;
   loading: boolean;
   onConfirmer: (reservation: ApiReservation) => void;
-  onSelectReservation: (reservation: ApiReservation | null) => void; // ← Correction ici
+  onSelectReservation: (reservation: ApiReservation | null) => void;
 }
 
 export default function ReservationView({
@@ -81,6 +82,22 @@ export default function ReservationView({
       'card': 'Carte'
     };
     return methodes[methode] || methode;
+  };
+
+  // Fonction pour voir la position du client
+  const handleVoirPosition = (reservation: ApiReservation) => {
+    router.push({
+      pathname: "/trouveClient",
+      params: {
+        startLat: reservation.latitude_depart,
+        startLng: reservation.longitude_depart,
+        destLat: reservation.latitude_destination,
+        destLng: reservation.longitude_destination,
+        clientNom: reservation.client_nom,
+        adresseDepart: reservation.adresse_depart,
+        adresseDestination: reservation.adresse_destination
+      }
+    });
   };
 
   const renderReservationItem = ({ item }: { item: ApiReservation }) => (
@@ -125,7 +142,6 @@ export default function ReservationView({
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Nouvelle Réservation</Text>
       <Text style={styles.subtitle}>
         Réservez seulement si vous êtes à proximité du client
       </Text>
@@ -136,8 +152,6 @@ export default function ReservationView({
           Réservations en attente ({reservations.length})
         </Text>
         
-
-        
         <FlatList
           data={reservations}
           renderItem={renderReservationItem}
@@ -147,13 +161,13 @@ export default function ReservationView({
         />
       </View>
 
-      {/* Détails de la réservation sélectionnée - N'apparaît QUE si on clique */}
-      {selectedReservation ? (
+      {/* Détails de la réservation sélectionnée */}
+      {selectedReservation && (
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Détails de la réservation</Text>
             <TouchableOpacity 
-              onPress={() => onSelectReservation(null)} // ← Maintenant ça fonctionne !
+              onPress={() => onSelectReservation(null)}
               style={styles.closeButton}
             >
               <Ionicons name="close" size={20} color="#666" />
@@ -209,28 +223,33 @@ export default function ReservationView({
             </Text>
           </View>
 
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={() => onConfirmer(selectedReservation)}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <>
-                <Ionicons name="checkmark-circle" size={20} color="#fff" />
-                <Text style={styles.buttonText}>Confirmer la réservation</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
-      ) : (
-        // Message quand aucune réservation n'est sélectionnée
-        <View style={styles.noSelection}>
-          <Ionicons name="information-circle-outline" size={40} color="#ccc" />
-          <Text style={styles.noSelectionText}>
-            Sélectionnez une réservation pour voir les détails
-          </Text>
+          {/* Deux boutons séparés */}
+          <View style={styles.buttonsContainer}>
+            {/* Bouton Voir Position */}
+            <TouchableOpacity
+              style={[styles.button, styles.secondaryButton]}
+              onPress={() => handleVoirPosition(selectedReservation)}
+            >
+              <Ionicons name="map-outline" size={20} color="#f25c3c" />
+              <Text style={styles.secondaryButtonText}>Voir la position du client</Text>
+            </TouchableOpacity>
+
+            {/* Bouton Confirmer */}
+            <TouchableOpacity
+              style={[styles.button, styles.primaryButton, loading && styles.buttonDisabled]}
+              onPress={() => onConfirmer(selectedReservation)}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <>
+                  <Ionicons name="checkmark-circle" size={20} color="#fff" />
+                  <Text style={styles.primaryButtonText}>Confirmer la réservation</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       )}
     </SafeAreaView>
@@ -267,13 +286,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     color: "#333",
-  },
-  instructionText: {
-    fontSize: 12,
-    color: "#666",
-    fontStyle: 'italic',
-    marginBottom: 10,
-    textAlign: 'center',
   },
   list: {
     flex: 1,
@@ -359,36 +371,40 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#000",
   },
+  buttonsContainer: {
+    marginTop: 18,
+    gap: 10,
+  },
   button: {
-    backgroundColor: "#f25c3c",
     borderRadius: 10,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    marginTop: 18,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  primaryButton: {
+    backgroundColor: "#f25c3c",
+  },
+  secondaryButton: {
+    backgroundColor: "transparent",
+    borderWidth: 2,
+    borderColor: "#f25c3c",
+  },
   buttonDisabled: {
     opacity: 0.7,
   },
-  buttonText: {
+  primaryButtonText: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
     marginLeft: 8,
   },
-  noSelection: {
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: 20,
-  },
-  noSelectionText: {
-    marginTop: 10,
-    fontSize: 14,
-    color: "#999",
-    textAlign: 'center',
+  secondaryButtonText: {
+    color: "#f25c3c",
+    fontWeight: "bold",
+    fontSize: 16,
+    marginLeft: 8,
   },
   emptyState: {
     flex: 1,

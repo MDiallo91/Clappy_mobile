@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BASE_URL = 'http://192.168.1.167:8000/api/';
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 
 export default class VehiculeService {
@@ -14,7 +14,7 @@ export default class VehiculeService {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, // Ajout du token
+        'Authorization': `Bearer ${token}`, 
       },
     });
 

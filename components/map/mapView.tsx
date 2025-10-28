@@ -796,7 +796,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                     />
                 </BottomSheetView>
             </BottomSheet> 
-   
+                        
         </View>
     );
 }

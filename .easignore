@@ -42,5 +42,4 @@ app-example
 /ios
 /android
 
-#goole service pour la notification firebase
-google-services.json
+
