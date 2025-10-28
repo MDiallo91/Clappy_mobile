@@ -45,3 +45,9 @@ app-example
 #goole service pour la notification firebase
 google-services.json
 notification-fc289-firebase-adminsdk-fbsvc-5a019e5723.json
+*.json
+firebase-adminsdk-*
+*.json
+service-account-key*
+keys/
+config/
