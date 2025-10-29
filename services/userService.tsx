@@ -9,7 +9,7 @@ export default class UtilisateurService {
   // Login de l'utilisateur - VERSION CORRIGÉE
   static async login(utilisateur: { username: string; password: string }) {
     try {
-      console.log('🔐 Tentative de connexion avec:', { 
+      console.log(' Tentative de connexion avec:', { 
         username: utilisateur.username,
         url: `${BASE_URL}login/`
       });
@@ -26,9 +26,9 @@ export default class UtilisateurService {
         }),
       });
 
-      console.log('📡 Statut HTTP:', response.status);
+      console.log(' Statut HTTP:', response.status);
       
-      // ✅ CORRECTION : Vérifier d'abord si la réponse est OK
+      // CORRECTION : Vérifier d'abord si la réponse est OK
       if (!response.ok) {
         // Si le statut n'est pas 200-299, c'est une erreur
         let errorMessage = `Erreur ${response.status}`;
@@ -44,22 +44,22 @@ export default class UtilisateurService {
         throw new Error(errorMessage);
       }
 
-      // ✅ Maintenant on peut parser la réponse JSON
+      // Maintenant on peut parser la réponse JSON
       const data = await response.json();
-      console.log("✅ Réponse complète:", data);
+      console.log(" Réponse complète:", data);
 
       // Vérifier le status retourné par le backend
       if (data.status === 'success') {
         // Sauvegarder le token
         if (data.token) {
           await AsyncStorage.setItem("auth_token", data.token);
-          console.log('✅ Token sauvegardé:', data.token.substring(0, 20) + '...');
+          console.log(' Token sauvegardé:', data.token.substring(0, 20) + '...');
         }
         
         // Sauvegarder les données utilisateur
         if (data.user) {
           await AsyncStorage.setItem("userData", JSON.stringify(data.user));
-          console.log('✅ Données utilisateur sauvegardées:', data.user.username);
+          console.log(' Données utilisateur sauvegardées:', data.user.username);
         }
         
         // Sauvegarder le token de rafraîchissement si disponible
@@ -81,12 +81,11 @@ export default class UtilisateurService {
       }
 
     } catch (error: any) {
-      console.error("❌ Erreur UtilisateurService login:", error.message || error);
+      console.error(" Erreur UtilisateurService login:", error.message || error);
       throw error;
     }
   }
 
-  // ... le reste de votre service reste inchangé
 
 
   // Vérifier si l'utilisateur est connecté
@@ -141,30 +140,57 @@ export default class UtilisateurService {
       };
     }
   }
-  //connection de l'utilisateur
-  static async addUtilisateur(utilisateur: any): Promise<{ status: number; message: string }> {
-    return fetch(`${BASE_URL}signup`, {
+static async addUtilisateur(utilisateur: any): Promise<{ status: number; message: string }> {
+  console.log("verification si le user est present lores de l'enregistrement",utilisateur)
+  try {
+    console.log(" Envoi des données d'inscription:", utilisateur);
+    
+    const response = await fetch(`${BASE_URL}clients/`, { 
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-
       },
       body: JSON.stringify(utilisateur),
-    })
-    .then(async (response) => {
-      const data = await response.json();
-      console.log("Réponse login:", data);
-      return {
-        message: data.message,
-        status: data.status,
-      };
-    })
-    .catch((error:any) => {
-     console.error(error)
-      throw error;
     });
+
+    console.log(" Statut HTTP:", response.status);
     
-  } 
+    // Lire d'abord en texte pour debugger
+    const responseText = await response.text();
+    console.log(" Réponse brute:", responseText.substring(0, 500));
+    
+    if (responseText) {
+      try {
+        const data = JSON.parse(responseText);
+        console.log("✅ Réponse inscription parsée:", data);
+        
+        return {
+          message: "Compte créé avec succès",
+          status: response.status,
+        };
+      } catch (jsonError) {
+        console.error("❌ Erreur parsing JSON:", jsonError);
+        return {
+          message: "Erreur de format de réponse",
+          status: 500,
+        };
+      }
+    } else {
+      // Réponse vide (peut arriver avec DRF)
+      return {
+        message: "Compte créé avec succès",
+        status: response.status,
+      };
+    }
+    
+  } catch (error: any) {
+    console.error("❌ Erreur inscription:", error);
+    return {
+      message: error.message || "Erreur de connexion",
+      status: 500,
+    };
+  }
+} 
   
 // Récupérer les utilisateurs
   // Récupérer les utilisateurs
@@ -195,7 +221,53 @@ static async getUsers(): Promise<any[]> {
   }
 }
 
-  
+//Verifier si le telephone existe deja dans la base avant de cree le compte
+  // Vérifier si le téléphone existe déjà
+// Dans userService.ts
+static async checkTelephoneExists(telephone: string): Promise<{ exists: boolean }> {
+  try {
+    console.log('🔍 Vérification du téléphone:', telephone);
+    
+    const response = await fetch(`${BASE_URL}check-phone/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ telephone }),
+    });
+
+    console.log('📊 Statut HTTP:', response.status);
+    
+    // Vérifier le Content-Type avant de parser
+    const contentType = response.headers.get('content-type');
+    
+    if (!contentType || !contentType.includes('application/json')) {
+      // Si ce n'est pas du JSON, lire le texte pour debugger
+      const textResponse = await response.text();
+      console.error('❌ Réponse non-JSON:', textResponse.substring(0, 200));
+      throw new Error('Le serveur a retourné une réponse non-JSON');
+    }
+    
+    if (!response.ok) {
+      throw new Error(`Erreur ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("✅ Réponse vérification téléphone:", data);
+    
+    return {
+      exists: data.exists || false
+    };
+
+  } catch (error: any) {
+    console.error("❌ Erreur vérification téléphone:", error.message || error);
+    
+    // En cas d'erreur, on suppose que le numéro n'existe pas
+    return {
+      exists: false
+    };
+  }
+}
   static updateUtilisateur(utilisateur: any): Promise<any> {
     return fetch(`${BASE_URL}user/${utilisateur.id}`, {
       method: "PUT",

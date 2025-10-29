@@ -10,7 +10,6 @@ import {
   ScrollView,
 } from "react-native";
 import { Controller } from "react-hook-form";
-import Confirmation from "./confirmation";
 
 const primary = "#EE6841";
 
@@ -20,14 +19,13 @@ export default function InscriptionView({
   step,
   setStep,
   handleTelephone,
-  handleVerification,
   handleSubmit,
   onSubmit,
   loading,
 }: any) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/*  Logo en haut */}
+      {/* Logo en haut */}
       <View style={styles.logoContainer}>
         <Image
           source={require("@/assets/images/Clappy_logo.jpg")} 
@@ -38,7 +36,7 @@ export default function InscriptionView({
 
       <Text style={styles.title}>Inscription</Text>
 
-      {/* Étape 1 */}
+      {/* Étape 1 - Téléphone seulement */}
       {step === 1 && (
         <>
           <Text style={styles.label}>Téléphone :</Text>
@@ -62,6 +60,7 @@ export default function InscriptionView({
           {errors.telephone && (
             <Text style={styles.error}>{errors.telephone.message}</Text>
           )}
+          
           <TouchableOpacity
             style={[styles.button, loading && { opacity: 0.7 }]}
             onPress={handleTelephone}
@@ -70,30 +69,21 @@ export default function InscriptionView({
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.btnText}>Envoyer le code</Text>
+              <Text style={styles.btnText}>Suivant</Text>
             )}
           </TouchableOpacity>
         </>
       )}
 
-      {/* Étape 2 */}
+      {/* Étape 2 - Informations complètes */}
       {step === 2 && (
-        <Confirmation
-          control={control}
-          onCodeChange={handleVerification}
-          loading={loading}
-        />
-      )}
-
-      {/* Étape 3 */}
-      {step === 3 && (
         <>
           <Text style={styles.label}>Email :</Text>
           <Controller
             control={control}
             name="email"
             rules={{
-              required: "L’email est obligatoire",
+              required: "L'email est obligatoire",
               pattern: { value: /^\S+@\S+$/i, message: "Email invalide" },
             }}
             render={({ field: { onChange, value } }) => (
@@ -144,17 +134,27 @@ export default function InscriptionView({
           />
           {errors.nom && <Text style={styles.error}>{errors.nom.message}</Text>}
 
-          <TouchableOpacity
-            style={[styles.button, loading && { opacity: 0.7 }]}
-            onPress={handleSubmit(onSubmit)}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.btnText}>Terminer</Text>
-            )}
-          </TouchableOpacity>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.secondaryButton, loading && { opacity: 0.7 }]}
+              onPress={() => setStep(1)}
+              disabled={loading}
+            >
+              <Text style={styles.secondaryBtnText}>Retour</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.button, loading && { opacity: 0.7 }]}
+              onPress={handleSubmit(onSubmit)}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.btnText}>S'inscrire</Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </>
       )}
     </ScrollView>
@@ -166,13 +166,11 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     backgroundColor: "#fff",
-    // justifyContent: "center",
   },
   logoContainer: {
     alignItems: "center",
     marginBottom: 10,
     marginTop: 30,
-    // backgroundColor:"red"
   },
   logo: {
     width: 100,
@@ -203,9 +201,34 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: primary,
     paddingVertical: 14,
+    paddingHorizontal:30,
     borderRadius: 10,
     alignItems: "center",
     marginTop: 10,
+    marginLeft: 5,
   },
-  btnText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  secondaryButton: {
+    backgroundColor: "#ccc",
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 10,
+    flex: 1,
+    marginRight: 5,
+  },
+  btnText: { 
+    color: "#fff", 
+    fontWeight: "bold", 
+    fontSize: 16 
+  },
+  secondaryBtnText: { 
+    color: "#333", 
+    fontWeight: "bold", 
+    fontSize: 16 
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
+  },
 });

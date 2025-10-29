@@ -47,15 +47,15 @@ import * as Notifications from 'expo-notifications';
 import React from 'react';
 
 // ✅ CORRECTION : Configuration avec le bon type
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true, // ✅ Ajouté pour iOS
-    shouldShowList: true,   // ✅ Ajouté pour iOS
-  }),
-});
+// Notifications.setNotificationHandler({
+//   handleNotification: async () => ({
+//     shouldShowAlert: true,
+//     shouldPlaySound: true,
+//     shouldSetBadge: true,
+//     shouldShowBanner: true, // ✅ Ajouté pour iOS
+//     shouldShowList: true,   // ✅ Ajouté pour iOS
+//   }),
+// });
 
 
 
@@ -79,7 +79,7 @@ export default function RootLayout() {
   }
 
   return (
-  <NotificationProvider>
+  // <NotificationProvider>
   <ThemeProvider value={colorScheme === 'light' ? DarkTheme : DefaultTheme}>
     <Stack>
       {isAuthenticated ? (
@@ -92,7 +92,7 @@ export default function RootLayout() {
     <Toast />
     <StatusBar style="dark" />
   </ThemeProvider>
-  </NotificationProvider>
+  // </NotificationProvider>
 );
 
 }

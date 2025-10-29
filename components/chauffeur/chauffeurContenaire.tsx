@@ -83,8 +83,9 @@ export default function ReservationContenaire() {
     try {
       setLoading(true);
       console.log("Confirmation de la réservation:", reservation);
-
+      const statut="acceptee"
       // Ici, vous appellerez votre API pour confirmer
+      await CoursService.updateCourseStatus(reservation.id, statut)
       // await CoursService.confirmReservation(reservation.id);
 
       // Simulation délai réseau

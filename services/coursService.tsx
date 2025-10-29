@@ -79,6 +79,74 @@ static async getCourses(): Promise<any[]> {
   }
 }
 
+//Update des courses
+static async updateCourseStatus(id: any, status: any, chauffeurId?: any): Promise<{ data: any; status: number; message: string }> {
+  try {
+    const token = await AsyncStorage.getItem("auth_token");
+    if (!token) {
+      return { 
+        data: null, 
+        status: 401, 
+        message: "Token d'authentification manquant" 
+      };
+    }
 
-  
+    console.log(`🔄 Mise à jour statut course ${id} avec:`, { status, chauffeurId });
+
+    // Préparer les données de mise à jour
+    const updateData: any = {
+      statut: status
+    };
+
+    // Si c'est une acceptation, ajouter le chauffeur et la date
+    if (status === 'acceptee' && chauffeurId) {
+      updateData.chauffeur = chauffeurId;
+      updateData.date_acceptation = new Date().toISOString();
+    }
+
+    const response = await fetch(
+      `${BASE_URL}courses/${id}/`,
+      {
+        method: 'PATCH', // PATCH pour mise à jour partielle
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(updateData),
+      }
+    );
+
+    const httpStatus = response.status;
+    const contentType = response.headers.get('content-type');
+    let responseData = null;
+
+    if (contentType && contentType.includes('application/json')) {
+      responseData = await response.json();
+    }
+
+    console.log("📨 Réponse mise à jour statut:", responseData);
+
+    if (response.ok) {
+      return { 
+        data: responseData, 
+        status: httpStatus, 
+        message: "Statut de la course mis à jour avec succès" 
+      };
+    } else {
+      return {
+        data: responseData,
+        status: httpStatus,
+        message: responseData?.erreur || responseData?.detail || `Erreur HTTP: ${httpStatus}`,
+      };
+    }
+
+  } catch (error) {
+    console.error("❌ Erreur mise à jour statut:", error);
+    return {
+      data: null,
+      status: 500,
+      message: "Erreur réseau lors de la mise à jour du statut"
+    };
+  }
+}
 }
