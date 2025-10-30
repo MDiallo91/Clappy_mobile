@@ -14,7 +14,8 @@ export default function InscriptionContainer() {
       telephone: "", 
       nom: "", 
       prenom: "", 
-      email: "" 
+      email: "",
+      password:""
     },
   });
 

@@ -131,9 +131,28 @@ export default function InscriptionView({
                 placeholder="Votre nom"
               />
             )}
+            
           />
           {errors.nom && <Text style={styles.error}>{errors.nom.message}</Text>}
 
+          <Text style={styles.label}>Mot de passe :</Text>
+          <Controller
+            control={control}
+            name="password"
+            rules={{ required: "Le nom est obligatoire" }}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                style={styles.input}
+                onChangeText={onChange}
+                value={value}
+                placeholder="Votre mot de passe"
+              />
+            )}
+            
+          />
+          {errors.nom && <Text style={styles.error}>{errors.nom.message}</Text>}
+
+            
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.secondaryButton, loading && { opacity: 0.7 }]}
