@@ -6,12 +6,19 @@ import { Tabs } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { useColorScheme, View, ActivityIndicator } from 'react-native';
 
+// Interface corrigée selon la structure de vos données
 interface UserData {
-  access: string;
+  message: string;
+  refresh_token: string;
+  status: string;
+  token: string;
+  chauffeur_id: number | null;
+  client_id: number;
+  email: string;
   id: number;
-  refresh: string;
-  status: number;
+  role: string; // "client", "chauffeur", ou "admin"
   username: string;
+
 }
 
 export default function TabLayout() {
@@ -23,9 +30,10 @@ export default function TabLayout() {
     const getUserData = async () => {
       try {
         const userDataString = await AsyncStorage.getItem("userData");
+        
         if (userDataString) {
-          const userData = JSON.parse(userDataString);
-          setUserData(userData);
+          const parsedData = JSON.parse(userDataString);
+          setUserData(parsedData);
         }
       } catch (error) {
         console.error("Erreur récupération userData:", error);
@@ -37,6 +45,7 @@ export default function TabLayout() {
     getUserData();
   }, []);
 
+  // console.log("le role du user lorem upsun",userData?.user.role)
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -44,8 +53,11 @@ export default function TabLayout() {
       </View>
     );
   }
-
-  const isAdmin = userData?.username === "admin";
+  console.log("les dataUser pour verification",userData)
+  // CORRECTION : Vérifier le rôle au lieu du username
+  const isAdmin = userData?.role === "admin";
+  const isClient = userData?.role === "client";
+  const isChauffeur = userData?.role === "chauffeur";
 
   return (
     <Tabs
@@ -55,40 +67,44 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
       }}
     >
-      {/* Onglets toujours visibles */}
+      {/* Onglets toujours visibles pour tous */}
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+
         }}
       />
+
+      {/* Trajet - visible pour clients et chauffeurs,  */}
       <Tabs.Screen
         name="trajet"
         options={{
           title: 'Trajet',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-          href: !isAdmin ? undefined : null, //  null = masqué de la tab bar
-
+          href: isClient ? undefined : null, // visible seulement par client
         }}
       />
+
+      {/* Profile - visible pour tous */}
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
-          href: !isAdmin ? undefined : null, //  null = masqué de la tab bar
+          href: isClient ? undefined : null, // visible seuelement par le client
 
         }}
       />
 
-      {/* Onglets admin - conditionnés */}
+      {/* Onglets admin - SEULEMENT visibles pour les chauffeur */}
       <Tabs.Screen
         name="chauffeur"
         options={{
           title: 'Chauffeur',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.circle.fill" color={color} />,
-          href: isAdmin ? undefined : null, //  null = masqué de la tab bar
+          href: isChauffeur ? undefined : null, // Visible seulement pour  chauffeur
         }}
       />
       <Tabs.Screen
@@ -96,7 +112,7 @@ export default function TabLayout() {
         options={{
           title: 'Payement',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="creditcard" color={color} />,
-          href: isAdmin ? undefined : null, //  null = masqué de la tab bar
+          href: isChauffeur ? undefined : null, // Visible seulement pour chauffeur
         }}
       />
     </Tabs>

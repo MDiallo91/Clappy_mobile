@@ -140,58 +140,63 @@ export default class UtilisateurService {
       };
     }
   }
-static async addUtilisateur(utilisateur: any): Promise<{ status: number; message: string }> {
-  console.log("verification si le user est present lores de l'enregistrement",utilisateur)
+// services/clientService.ts
+static async addUtilisateur(clientData: {
+  email: string;
+  nom: string;
+  prenom: string;
+  telephone: string;
+  password?: string;
+}): Promise<{ data: any; status: number; message: string }> {
   try {
-    console.log(" Envoi des données d'inscription:", utilisateur);
-    
-    const response = await fetch(`${BASE_URL}clients/`, { 
-      method: "POST",
+    console.log(" Envoi des données d'inscription:", clientData);
+
+    const response = await fetch(`${BASE_URL}clients/`, {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(utilisateur),
+      body: JSON.stringify(clientData),
     });
 
-    console.log(" Statut HTTP:", response.status);
-    
-    // Lire d'abord en texte pour debugger
-    const responseText = await response.text();
-    console.log(" Réponse brute:", responseText.substring(0, 500));
-    
-    if (responseText) {
-      try {
-        const data = JSON.parse(responseText);
-        console.log("✅ Réponse inscription parsée:", data);
-        
-        return {
-          message: "Compte créé avec succès",
-          status: response.status,
-        };
-      } catch (jsonError) {
-        console.error("❌ Erreur parsing JSON:", jsonError);
-        return {
-          message: "Erreur de format de réponse",
-          status: 500,
-        };
-      }
-    } else {
-      // Réponse vide (peut arriver avec DRF)
+    const httpStatus = response.status;
+    let responseData = null;
+
+    // Vérifier le content-type avant de parser JSON
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      responseData = await response.json();
+    }
+
+    console.log("📨 Statut HTTP:", httpStatus);
+    console.log("📨 Réponse brute:", responseData);
+
+    if (response.ok) {
       return {
-        message: "Compte créé avec succès",
-        status: response.status,
+        data: responseData,
+        status: httpStatus,
+        message: "Inscription réussie"
+      };
+    } else {
+      return {
+        data: responseData,
+        status: httpStatus,
+        message: responseData?.utilisateur?.[0] || 
+                responseData?.email?.[0] || 
+                responseData?.telephone?.[0] ||
+                "Erreur lors de l'inscription"
       };
     }
-    
-  } catch (error: any) {
+
+  } catch (error) {
     console.error("❌ Erreur inscription:", error);
     return {
-      message: error.message || "Erreur de connexion",
+      data: null,
       status: 500,
+      message: "Erreur réseau lors de l'inscription"
     };
   }
-} 
-  
+}
 // Récupérer les utilisateurs
   // Récupérer les utilisateurs
 static async getUsers(): Promise<any[]> {

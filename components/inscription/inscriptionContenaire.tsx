@@ -59,48 +59,62 @@ export default function InscriptionContainer() {
     }
   };
 
-  // Étape 2 : Création du compte
-  const onSubmit = async (data: any) => {
-    setLoading(true);
-    console.log("les data",data)
-    try {
-      const response = await UtilisateurService.addUtilisateur(data);
-      
-      if (response.status === 200 || response.status === 201) {
-        Toast.show({ 
-          type: "success", 
-          text1: "Compte créé avec succès!",
-          text2: "Vous pouvez maintenant vous connecter" 
-        });
-        router.push("/connexion");
-      } else {
-        // Gérer les erreurs spécifiques
-        if (response.message?.includes("déjà utilisé") || response.message?.includes("existe déjà")) {
-          Toast.show({ 
-            type: "error", 
-            text1: "Numéro déjà utilisé",
-            text2: "Ce numéro est déjà associé à un compte" 
-          });
-          setStep(1); // Retour à l'étape 1
-        } else {
-          Toast.show({ 
-            type: "error", 
-            text1: "Erreur", 
-            text2: response.message || "Impossible de créer le compte" 
-          });
-        }
-      }
-    } catch (error: any) {
+// Étape 2 : Création du compte
+const onSubmit = async (data: any) => {
+  setLoading(true);
+  console.log("📝 Données du formulaire:", data);
+  
+  try {
+    // Utiliser le service corrigé
+    const response = await UtilisateurService.addUtilisateur(data);
+    
+    console.log("📨 Réponse du service:", response);
+    
+    if (response.status === 200 || response.status === 201) {
       Toast.show({ 
-        type: "error", 
-        text1: "Erreur", 
-        text2: error.message || "Veuillez réessayer" 
+        type: "success", 
+        text1: "Compte créé avec succès!",
+        text2: "Vous pouvez maintenant vous connecter" 
       });
-    } finally {
-      setLoading(false);
+      router.push("/connexion");
+    } else {
+      // Gérer les erreurs spécifiques
+      const errorMessage = response.message.toLowerCase();
+      
+      if (errorMessage.includes("déjà utilisé") || 
+          errorMessage.includes("existe déjà") ||
+          errorMessage.includes("déjà associé")) {
+        Toast.show({ 
+          type: "error", 
+          text1: "Numéro déjà utilisé",
+          text2: "Ce numéro est déjà associé à un compte" 
+        });
+        setStep(1); // Retour à l'étape 1
+      } else if (errorMessage.includes("email")) {
+        Toast.show({ 
+          type: "error", 
+          text1: "Email déjà utilisé",
+          text2: "Cet email est déjà associé à un compte" 
+        });
+      } else {
+        Toast.show({ 
+          type: "error", 
+          text1: "Erreur", 
+          text2: response.message || "Impossible de créer le compte" 
+        });
+      }
     }
-  };
-
+  } catch (error: any) {
+    console.error("❌ Erreur catch:", error);
+    Toast.show({ 
+      type: "error", 
+      text1: "Erreur", 
+      text2: error.message || "Veuillez réessayer" 
+    });
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <InscriptionView
       step={step}
