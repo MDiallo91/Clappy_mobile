@@ -1,9 +1,11 @@
 // PaimentContainer.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import PaiementView from './paiementView';
 import CoursService from '@/services/coursService';
 import ConfirmeAlert from './confirmeAlert';
+import { UserData } from '@/types/type';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface CourseData {
   vehicleType: string;
@@ -29,6 +31,27 @@ function PaimentContainer() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [courseResult, setCourseResult] = useState<any>(null);
 
+  //recuperer le user conntecter.
+  const [userData, setUserData] = useState<UserData | null>(null);
+  
+    useEffect(() => {
+      const getUserData = async () => {
+        try {
+          const userDataString = await AsyncStorage.getItem("userData");
+          
+          if (userDataString) {
+            const parsedData = JSON.parse(userDataString);
+            setUserData(parsedData);
+          }
+        } catch (error) {
+          console.error("Erreur récupération userData:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      getUserData();
+    }, []);
   // Préparer les données de la course depuis les params
   const courseData: CourseData = {
     vehicleType: params.vehicleType as string,
@@ -54,10 +77,11 @@ function PaimentContainer() {
 
     setLoading(true);
     try {
+
       console.log('Envoi de la course au backend:', courseData);
 
       const courseToSend = {
-        client: 1, // À remplacer par l'ID du client connecté
+        client: userData?.client_id, // À remplacer par l'ID du client connecté
         adresse_depart: courseData.start,
         adresse_destination: courseData.destination,
         tarif_estime: courseData.price,

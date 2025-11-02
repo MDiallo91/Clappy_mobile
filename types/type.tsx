@@ -33,3 +33,18 @@ export interface WebSocketMessage {
   push_token?: string;
   vehicle_type?: string;
 }
+
+// Interface user connecter
+export interface UserData {
+  message: string;
+  refresh_token: string;
+  status: string;
+  token: string;
+  chauffeur_id: number | null;
+  client_id: number;
+  email: string;
+  id: number;
+  role: string; // "client", "chauffeur", ou "admin"
+  username: string;
+
+}

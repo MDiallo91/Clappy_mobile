@@ -102,11 +102,11 @@ const getAddressFromCoords = async (coords: Coordonnees): Promise<string> => {
         
         // Fallback aux coordonnées
         const fallbackAddress = `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
-        console.log(" Fallback aux coordonnées:", fallbackAddress);
+        // console.log(" Fallback aux coordonnées:", fallbackAddress);
         return fallbackAddress;
         
     } catch (error) {
-        console.error(" Erreur reverse geocoding:", error);
+        // console.error(" Erreur reverse geocoding:", error); 
         return `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
     }
 };
@@ -135,7 +135,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
     const [tarifs, setTarifs] = useState<any>([]);
     const [transformedTarifs, setTransformedTarifs] = useState<Vehicule[]>([]);
     const params = useLocalSearchParams();
-
+    
    // Récupération de la position actuelle avec reverse geocoding
     useEffect(() => {
         (async () => {
@@ -151,7 +151,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                 setCurrentLocation({ latitude, longitude });
                 setStartCoord({ latitude, longitude });
                 
-                console.log(" Coordonnées actuelles:", latitude, longitude);
+                // console.log(" Coordonnées actuelles:", latitude, longitude);
                 
                 // Reverse geocoding pour obtenir le nom du lieu
                 const addresses = await Location.reverseGeocodeAsync({
@@ -161,7 +161,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                 
                 if (addresses && addresses.length > 0) {
                     const address = addresses[0];
-                    console.log(" Adresse reverse geocoding:", address);
+                    // console.log(" Adresse reverse geocoding:", address);
                     
                     // Construire une adresse lisible
                     const addressParts = [
@@ -182,14 +182,14 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                     }
                     
                     setStart(formattedAddress);
-                    console.log(" Adresse formatée:", formattedAddress);
+                    // console.log(" Adresse formatée:", formattedAddress);
                 } else {
                     setStart("Position actuelle");
-                    console.log(" Aucune adresse trouvée");
+                    // console.log(" Aucune adresse trouvée");
                 }
                 
             } catch (error) {
-                console.error(" Erreur lors de la géolocalisation:", error);
+                // console.error(" Erreur lors de la géolocalisation:", error);
                 // Fallback aux coordonnées en cas d'erreur
                 if (currentLocation) {
                     setStart(`${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}`);
@@ -216,13 +216,13 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
             try {
                 const tarif = await VehiculeService.getTarif();
                 setTarifs(tarif);
-                console.log(" Tarifs chargés:", tarif);
+                // console.log(" Tarifs chargés:", tarif);
                 
                 const transformed: Vehicule[] = tarif.map((item: any) => {
                     let iconName = "car-outline";
                     let displayName = item.type_vehicule;
                     let description = "Véhicule standard";
-                    console.log("Recuperation des donnee de vehicule pour voir",item)
+                    // console.log("Recuperation des donnee de vehicule pour voir",item)
                     switch(item.type_vehicule.toLowerCase()) {
                         case "economique":
                             iconName = "car-outline";
@@ -291,7 +291,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                 });
                 
                 setTransformedTarifs(transformed);
-                console.log(" Véhicules transformés:", transformed.length);
+                // console.log(" Véhicules transformés:", transformed.length);
             } catch (error) {
                 console.error(" Erreur lors de la récupération des tarifs:", error);
             }
@@ -318,11 +318,11 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
 
     // Debug des états importants
     useEffect(() => {
-        console.log(" destination state:", destination);
+        // console.log(" destination state:", destination);
     }, [destination]);
 
     useEffect(() => {
-        console.log(" destCoord state:", destCoord);
+        // console.log(" destCoord state:", destCoord);
     }, [destCoord]);
 
     // Suggestions via Photon API
@@ -334,7 +334,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
         
         try {
             const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&lang=fr`;
-            console.log(" Recherche suggestions:", query);
+            // console.log(" Recherche suggestions:", query);
             
             const res = await fetch(url);
             const data = await res.json();
@@ -350,7 +350,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                 }))
                 .slice(0, 8);
             
-            console.log(" Suggestions trouvées:", suggestions.length);
+            // console.log(" Suggestions trouvées:", suggestions.length);
             
             type === "start" ? setStartSuggestions(suggestions) : setDestSuggestions(suggestions);
         } catch (error) {
@@ -369,7 +369,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
         
         const formattedAddress = addressParts.join(', ');
         
-        console.log(" Sélection:", { type, formattedAddress, coords: { lat: item.lat, lon: item.lon } });
+        // console.log(" Sélection:", { type, formattedAddress, coords: { lat: item.lat, lon: item.lon } });
         
         if (type === "start") {
             setStart(formattedAddress);
@@ -379,7 +379,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
             setDestination(formattedAddress);
             setDestCoord({ latitude: item.lat, longitude: item.lon });
             setDestSuggestions([]);
-            console.log(" Destination définie:", formattedAddress);
+            // console.log(" Destination définie:", formattedAddress);
         }
     };
 
@@ -414,7 +414,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                 timestamp: new Date().toISOString()
             };
             
-            console.log(" Tentative d'enregistrement:", newTrajet);
+            // console.log(" Tentative d'enregistrement:", newTrajet);
             
             const existing = await AsyncStorage.getItem("trajets");
             const trajets: TrajetComplet[] = existing ? JSON.parse(existing) : [];
@@ -423,10 +423,10 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
             
             // Vérifier que l'enregistrement a fonctionné
             const verify = await AsyncStorage.getItem("trajets");
-            console.log("Trajet enregistré avec succès. Stockage vérifié:", verify ? JSON.parse(verify).length : 0, "trajets");
+            // console.log("Trajet enregistré avec succès. Stockage vérifié:", verify ? JSON.parse(verify).length : 0, "trajets");
             
         } catch (error) {
-            console.error(" Erreur lors de l'enregistrement du trajet:", error);
+            // console.error(" Erreur lors de l'enregistrement du trajet:", error);
             Alert.alert("Erreur", "Impossible d'enregistrer le trajet");
         }
     };
@@ -440,7 +440,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
         
         try {
             setLoading(true);
-            console.log(" Début du traçage de la route...");
+            // console.log(" Début du traçage de la route...");
             
             const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_API_KEY}&start=${startC.longitude},${startC.latitude}&end=${destC.longitude},${destC.latitude}`;
             const res = await fetch(url);
@@ -464,7 +464,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
             setDistance(dist);
             setDuration(dur);
 
-            console.log(" Route tracée:", { distance: dist, duration: dur });
+            // console.log(" Route tracée:", { distance: dist, duration: dur });
 
             mapRef.current?.fitToCoordinates(coords, {
                 edgePadding: { top: 100, right: 50, bottom: 200, left: 50 },
@@ -509,12 +509,12 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
 
     // Sélectionner un véhicule - CORRIGÉ avec gestion robuste des adresses
     const handleVehicleSelect = async (vehicle: Vehicule) => {
-        console.log("Sélection véhicule:", {
-            destination,
-            start,
-            destCoord,
-            startCoord
-        });
+        // console.log("Sélection véhicule:", {
+        //     destination,
+        //     start,
+        //     destCoord,
+        //     startCoord
+        // });
         
         const price = calculatePrice(vehicle);
         setSelectedVehicle(vehicle);
@@ -525,10 +525,10 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
             const startAddressFinal = start || await getAddressFromCoords(startCoord!);
             const destinationAddressFinal = destination || await getAddressFromCoords(destCoord!);
             
-            console.log(" Adresses finales pour enregistrement:", {
-                start: startAddressFinal,
-                destination: destinationAddressFinal
-            });
+            // console.log(" Adresses finales pour enregistrement:", {
+            //     start: startAddressFinal,
+            //     destination: destinationAddressFinal
+            // });
             
             // Enregistrer le trajet COMPLET avant la redirection
             await saveTrajet(
@@ -543,7 +543,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                 destinationAddressFinal
             );
             
-            console.log(" Trajet enregistré, redirection vers paiement...");
+            // console.log(" Trajet enregistré, redirection vers paiement...");
             
             // Rediriger vers la page de paiement après un court délai
             setTimeout(() => {
@@ -593,6 +593,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                 }}
                 showsUserLocation
                 showsMyLocationButton
+                 provider={undefined}
             >
                 {startCoord && (
                     <Marker coordinate={startCoord} title="Départ">

@@ -10,26 +10,19 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "dev.expo.clappy",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
+      "bundleIdentifier": "dev.expo.clappy"
     },
     "android": {
       "package": "dev.expo.clappy",
-      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#E6F4FE"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/Clappy_logo.jpg"
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyB1xMP9XpXq7YQwK8nV7mL6zZcD8rS9tUvWxY"
+        }
+      }
     },
     "plugins": [
       "expo-router",
@@ -39,22 +32,14 @@
           "image": "./assets/images/Clappy_logo.jpg",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "backgroundColor": "#ffffff"
         }
-      ],
-      "expo-maps"
+      ]
     ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    },
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "458cd349-75ef-49cb-a296-5f53287cde06"
+        "projectId": "613d785e-c49f-4d56-854c-93c11d8ce0aa"
       }
     },
     "owner": "madiallo"
