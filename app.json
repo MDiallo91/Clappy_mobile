@@ -1,47 +1,52 @@
 {
   "expo": {
-    "name": "clappy",
-    "slug": "clappy",
+    "name": "Clappy",
+    "slug": "clappyappy",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/Clappy_logo.jpg",
+    "icon": "./assets/images/Clappy_logo.png",
     "scheme": "clappy",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "dev.expo.clappy"
-    },
     "android": {
-      "package": "dev.expo.clappy",
+      "jsEngine": "hermes",
+      "package": "com.cissefode.clappy",
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundColor": "#E6F4FE"
       },
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyB1xMP9XpXq7YQwK8nV7mL6zZcD8rS9tUvWxY"
+          "apiKey": "AIzaSyDfnHdioRjLABbJUfebL6uPQvpn0adIPuo"
         }
-      }
+      },
+      "permissions": []
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cissefode.clappy"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/Clappy_logo.jpg",
+          "image": "./assets/images/Clappy_logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "613d785e-c49f-4d56-854c-93c11d8ce0aa"
+        "projectId": "5d1ca0e7-5a31-49b2-80aa-78ddcb0fa888"
       }
     },
-    "owner": "madiallo"
+    "owner": "cissefode",
+    "assetBundlePatterns": ["**/*"]
   }
 }
