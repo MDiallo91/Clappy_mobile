@@ -199,12 +199,12 @@ static async addUtilisateur(clientData: {
 }
 // Récupérer les utilisateurs
   // Récupérer les utilisateurs
-static async getUsers(): Promise<any[]> {
+static async getUser(): Promise<any> {
   try {
     // Récupérer le token stocké
     const token = await AsyncStorage.getItem("auth_token");
     
-    const response = await fetch(`${BASE_URL}clients`, {
+    const response = await fetch(`${BASE_URL}me/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

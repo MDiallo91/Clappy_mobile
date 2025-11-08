@@ -1,5 +1,6 @@
 import { Drawer } from "expo-router/drawer";
 import { Ionicons } from "@expo/vector-icons";
+import React from "react";
 
 export default function DrawerLayout() {
   return (
@@ -38,7 +39,7 @@ export default function DrawerLayout() {
           ),
         }}
       />
-       <Drawer.Screen
+       {/* <Drawer.Screen
         name="logout"
         options={{
           title: "Deconnxion",
@@ -46,7 +47,7 @@ export default function DrawerLayout() {
             <Ionicons name="log-out-outline" size={size} color={color} />
           ),
         }}
-      />
+      /> */}
     </Drawer>
   );
 }

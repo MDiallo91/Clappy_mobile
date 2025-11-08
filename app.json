@@ -13,7 +13,7 @@
       "package": "com.cissefode.clappy",
       "versionCode": 3,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "foregroundImage": "./assets/images/Clappy_logo.png",
         "backgroundColor": "#E6F4FE"
       },
       "config": {
@@ -43,10 +43,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "5d1ca0e7-5a31-49b2-80aa-78ddcb0fa888"
+        "projectId": "7a7b0ba5-0688-4137-bdfe-fc349e47fbc8"
       }
     },
-    "owner": "cissefode",
-    "assetBundlePatterns": ["**/*"]
+    "owner": "mamadou-diallo"
   }
 }

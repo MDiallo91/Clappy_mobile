@@ -28,11 +28,11 @@ interface PaiementViewProps {
 }
 
 const paymentMethods = [
-    { id: 'orange_money', name: 'Orange Money', icon: 'phone-portrait' },
-    { id: 'mobile_money', name: 'MTN Money', icon: 'phone-portrait' },
-    { id: 'wave', name: 'Wave', icon: 'card' },
+    // { id: 'orange_money', name: 'Orange Money', icon: 'phone-portrait' },
+    // { id: 'mobile_money', name: 'MTN Money', icon: 'phone-portrait' },
+    // { id: 'wave', name: 'Wave', icon: 'card' },
     { id: 'especes', name: 'Espèces', icon: 'cash' },
-    { id: 'carte_bancaire', name: 'Carte Bancaire', icon: 'card' },
+    // { id: 'carte_bancaire', name: 'Carte Bancaire', icon: 'card' },
 ];
 
 export default function PaiementView({

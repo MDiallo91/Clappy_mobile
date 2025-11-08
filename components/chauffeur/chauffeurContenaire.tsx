@@ -4,6 +4,7 @@ import Toast from "react-native-toast-message";
 import { router } from "expo-router";
 import CoursService from "@/services/coursService";
 import { ActivityIndicator, View, Text, StyleSheet } from "react-native";
+import UtilisateurService from "@/services/userService";
 
 
   const primary = "#EE6841";
@@ -34,9 +35,10 @@ interface ApiReservation {
   latitude_destination: string;
   longitude_depart: string;
   longitude_destination: string;
-  notes_client: string;
+  client_nom_complet: string;
   tarif_final: string | null;
   url: string;
+  type_vehicule_demande:string
 }
 
 export default function ReservationContenaire() {
@@ -44,7 +46,21 @@ export default function ReservationContenaire() {
   const [dataLoading, setDataLoading] = useState(true); // Nouvel état pour le chargement des données
   const [reservations, setReservations] = useState<ApiReservation[]>([]);
   const [selectedReservation, setSelectedReservation] = useState<ApiReservation | null>(null);
+  const [chauffeur,setChauffeur] = useState<any>()
 
+  //Recuperer le chauffeur connecter
+ useEffect(() => {
+    const fetchChauffeur = async () => {
+      try {
+        const userData = await UtilisateurService.getUser(); // récupère l'utilisateur
+        setChauffeur(userData);
+        // console.log("le user connecter",userData)
+      } catch (err: any) {
+        console.error('Erreur récupération chauffeur:', err);
+      } 
+    };
+    fetchChauffeur();
+  }, []);
 
   // Récupération des courses en attente
   useEffect(() => {
@@ -85,7 +101,7 @@ export default function ReservationContenaire() {
       console.log("Confirmation de la réservation:", reservation);
       const statut="acceptee"
       // Ici, vous appellerez votre API pour confirmer
-      await CoursService.updateCourseStatus(reservation.id, statut)
+      await CoursService.updateCourseStatus(reservation.id, statut,chauffeur?.id)
       // await CoursService.confirmReservation(reservation.id);
 
       // Simulation délai réseau
@@ -96,9 +112,11 @@ export default function ReservationContenaire() {
         text1: "Réservation confirmée 🎉",
         text2: `Départ : ${reservation.adresse_depart} ➜ ${reservation.adresse_destination}`,
       });
-
+         setReservations((prev) =>
+        prev.filter((item) => item.id !== reservation.id)
+      );
       // Redirection après confirmation
-      router.push("/");
+      // router.push("/");
     } catch (error) {
       console.error("Erreur confirmation:", error);
       Toast.show({

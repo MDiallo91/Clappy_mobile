@@ -81,7 +81,7 @@ function PaimentContainer() {
       console.log('Envoi de la course au backend:', courseData);
 
       const courseToSend = {
-        client: userData?.client_id, // À remplacer par l'ID du client connecté
+        client: userData?.client_id, // 
         adresse_depart: courseData.start,
         adresse_destination: courseData.destination,
         tarif_estime: courseData.price,

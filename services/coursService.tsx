@@ -80,73 +80,159 @@ static async getCourses(): Promise<any[]> {
 }
 
 //Update des courses
-static async updateCourseStatus(id: any, status: any, chauffeurId?: any): Promise<{ data: any; status: number; message: string }> {
-  try {
-    const token = await AsyncStorage.getItem("auth_token");
-    if (!token) {
-      return { 
-        data: null, 
-        status: 401, 
-        message: "Token d'authentification manquant" 
-      };
-    }
+// static async updateCourseStatus(id: any, status: any, chauffeurId?: any): Promise<{ data: any; status: number; message: string }> {
+//   try {
+//     const token = await AsyncStorage.getItem("auth_token");
+//     if (!token) {
+//       return { 
+//         data: null, 
+//         status: 401, 
+//         message: "Token d'authentification manquant" 
+//       };
+//     }
 
-    console.log(`🔄 Mise à jour statut course ${id} avec:`, { status, chauffeurId });
+//     console.log(`🔄 Mise à jour statut course ${id} avec:`, { status, chauffeurId });
 
-    // Préparer les données de mise à jour
-    const updateData: any = {
-      statut: status
-    };
+//     // Préparer les données de mise à jour
+//     const updateData: any = {
+//       statut: status
+//     };
 
-    // Si c'est une acceptation, ajouter le chauffeur et la date
-    if (status === 'acceptee' && chauffeurId) {
-      updateData.chauffeur = chauffeurId;
-      updateData.date_acceptation = new Date().toISOString();
-    }
+//     // Si c'est une acceptation, ajouter le chauffeur et la date
+//     if (status === 'acceptee' && chauffeurId) {
+//       updateData.chauffeur = chauffeurId;
+//       updateData.date_acceptation = new Date().toISOString();
+//     }
 
-    const response = await fetch(
-      `${BASE_URL}courses/${id}/`,
-      {
-        method: 'PATCH', // PATCH pour mise à jour partielle
-        headers: { 
+//     const response = await fetch(
+//       `${BASE_URL}courses/${id}/`,
+//       {
+//         method: 'PATCH', // PATCH pour mise à jour partielle
+//         headers: { 
+//           'Content-Type': 'application/json',
+//           'Authorization': `Bearer ${token}`,
+//         },
+//         body: JSON.stringify(updateData),
+//       }
+//     );
+
+//     const httpStatus = response.status;
+//     const contentType = response.headers.get('content-type');
+//     let responseData = null;
+
+//     if (contentType && contentType.includes('application/json')) {
+//       responseData = await response.json();
+//     }
+
+//     console.log("📨 Réponse mise à jour statut:", responseData);
+
+//     if (response.ok) {
+//       return { 
+//         data: responseData, 
+//         status: httpStatus, 
+//         message: "Statut de la course mis à jour avec succès" 
+//       };
+//     } else {
+//       return {
+//         data: responseData,
+//         status: httpStatus,
+//         message: responseData?.erreur || responseData?.detail || `Erreur HTTP: ${httpStatus}`,
+//       };
+//     }
+
+//   } catch (error) {
+//     console.error("❌ Erreur mise à jour statut:", error);
+//     return {
+//       data: null,
+//       status: 500,
+//       message: "Erreur réseau lors de la mise à jour du statut"
+//     };
+//   }
+// }
+  //Update des courses
+  static async updateCourseStatus(
+    id: any,
+    status: string,
+    chauffeurId?: any
+  ): Promise<{ data: any; status: number; message: string }> {
+    try {
+      const token = await AsyncStorage.getItem("auth_token");
+      if (!token) {
+        return {
+          data: null,
+          status: 401,
+          message: "Token d'authentification manquant"
+        };
+      }
+
+      console.log(`🔄 Mise à jour statut course ${id} avec:`, { status, chauffeurId });
+
+      let url = `${BASE_URL}courses/${id}/`;
+      let method = 'PATCH';
+      let bodyData: any = {};
+
+      // Si c'est une acceptation par le chauffeur
+      if (status === 'acceptee' && chauffeurId) {
+        url += 'accepter/'; // Appel de l'action personnalisée
+        method = 'POST';
+        bodyData = { chauffeur_id: chauffeurId };
+      }
+
+      // Si c'est un démarrage
+      if (status === 'en_cours') {
+        url += 'demarrer/';
+        method = 'POST';
+        bodyData = {};
+      }
+
+      // Si c'est une terminaison
+      if (status === 'terminee') {
+        url += 'terminer/';
+        method = 'POST';
+        bodyData = { tarif_final: bodyData.tarif_final || null };
+      }
+
+      const response = await fetch(url, {
+        method,
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(updateData),
+        body: JSON.stringify(bodyData),
+      });
+
+      const httpStatus = response.status;
+      const contentType = response.headers.get('content-type');
+      let responseData = null;
+
+      if (contentType && contentType.includes('application/json')) {
+        responseData = await response.json();
       }
-    );
 
-    const httpStatus = response.status;
-    const contentType = response.headers.get('content-type');
-    let responseData = null;
+      console.log("📨 Réponse mise à jour statut:", responseData);
 
-    if (contentType && contentType.includes('application/json')) {
-      responseData = await response.json();
-    }
+      if (response.ok) {
+        return {
+          data: responseData,
+          status: httpStatus,
+          message: "Statut de la course mis à jour avec succès"
+        };
+      } else {
+        return {
+          data: responseData,
+          status: httpStatus,
+          message: responseData?.erreur || responseData?.detail || `Erreur HTTP: ${httpStatus}`,
+        };
+      }
 
-    console.log("📨 Réponse mise à jour statut:", responseData);
-
-    if (response.ok) {
-      return { 
-        data: responseData, 
-        status: httpStatus, 
-        message: "Statut de la course mis à jour avec succès" 
-      };
-    } else {
+    } catch (error) {
+      console.error("❌ Erreur mise à jour statut:", error);
       return {
-        data: responseData,
-        status: httpStatus,
-        message: responseData?.erreur || responseData?.detail || `Erreur HTTP: ${httpStatus}`,
+        data: null,
+        status: 500,
+        message: "Erreur réseau lors de la mise à jour du statut"
       };
     }
-
-  } catch (error) {
-    console.error("❌ Erreur mise à jour statut:", error);
-    return {
-      data: null,
-      status: 500,
-      message: "Erreur réseau lors de la mise à jour du statut"
-    };
   }
-}
+
 }

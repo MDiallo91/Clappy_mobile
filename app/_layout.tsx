@@ -49,7 +49,7 @@ export default function RootLayout() {
 
   return (
   // <NotificationProvider>
-  <ThemeProvider value={colorScheme === 'light' ? DarkTheme : DefaultTheme}>
+  <>
     <Stack>
       {isAuthenticated ? (
         <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
@@ -60,7 +60,7 @@ export default function RootLayout() {
     </Stack>
     <Toast />
     <StatusBar style="dark" />
-  </ThemeProvider>
+  </>
   // </NotificationProvider>
 );
 

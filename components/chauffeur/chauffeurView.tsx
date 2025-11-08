@@ -4,14 +4,13 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ActivityIndicator,
   FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
-// Interface basée sur  API
+// Interface basée sur API
 interface ApiReservation {
   id: number;
   adresse_depart: string;
@@ -22,6 +21,7 @@ interface ApiReservation {
   statut: string;
   tarif_estime: string;
   date_demande: string;
+  type_vehicule_demande: string;
   chauffeur: any;
   client: number;
   date_acceptation: string | null;
@@ -35,7 +35,7 @@ interface ApiReservation {
   latitude_destination: string;
   longitude_depart: string;
   longitude_destination: string;
-  notes_client: string;
+  client_nom_complet: string;
   tarif_final: string | null;
   url: string;
 }
@@ -55,79 +55,80 @@ export default function ReservationView({
   onConfirmer,
   onSelectReservation,
 }: Props) {
-  // Fonction pour formater l'adresse (enlever les codes GPS)
+  // Fonction pour formater les adresses et autres infos
   const formatAdresse = (adresse: string): string => {
-    if (adresse.includes('+')) {
-      const parts = adresse.split(', ');
-      return parts.length > 1 ? parts.slice(1).join(', ') : adresse;
+    if (adresse.includes("+")) {
+      const parts = adresse.split(", ");
+      return parts.length > 1 ? parts.slice(1).join(", ") : adresse;
     }
     return adresse;
   };
 
-  // Fonction pour formater le type de course
   const formatTypeCourse = (type: string): string => {
-    const types: { [key: string]: string } = {
-      'immediate': 'Standard',
-      'comfort': 'Confort',
-      'premium': 'Premium'
+    const types: Record<string, string> = {
+      immediate: "Standard",
+      comfort: "Confort",
+      premium: "Premium",
     };
     return types[type] || type;
   };
 
-  // Fonction pour formater le paiement
   const formatPaiement = (methode: string): string => {
-    const methodes: { [key: string]: string } = {
-      'mobile_money': 'Mobile Money',
-      'cash': 'Espèces',
-      'card': 'Carte'
+    const methodes: Record<string, string> = {
+      mobile_money: "Mobile Money",
+      cash: "Espèces",
+      card: "Carte",
     };
     return methodes[methode] || methode;
   };
 
-  // Fonction pour voir la position du client
+  // Fonction pour afficher la carte avec les positions
   const handleVoirPosition = (reservation: ApiReservation) => {
+    console.log("🧭 Ouverture de la carte pour :", reservation);
     router.push({
       pathname: "/trouveClient",
       params: {
+        id: reservation.id,
         startLat: reservation.latitude_depart,
         startLng: reservation.longitude_depart,
         destLat: reservation.latitude_destination,
         destLng: reservation.longitude_destination,
-        clientNom: reservation.client_nom,
+        clientNom: reservation.client_nom_complet,
         adresseDepart: reservation.adresse_depart,
-        adresseDestination: reservation.adresse_destination
-      }
+        adresseDestination: reservation.adresse_destination,
+      },
     });
   };
 
+  // ✅ Dès qu'on clique sur une réservation, on ouvre directement la carte
   const renderReservationItem = ({ item }: { item: ApiReservation }) => (
     <TouchableOpacity
       style={[
         styles.reservationItem,
-        selectedReservation?.id === item.id && styles.selectedItem
+        selectedReservation?.id === item.id && styles.selectedItem,
       ]}
-      onPress={() => onSelectReservation(item)}
+      onPress={() => handleVoirPosition(item)}
     >
-      <Text style={styles.itemClient}>{item.client_nom || "Client"}</Text>
+      <Text style={styles.itemClient}>{item.client_nom_complet || "Client"}</Text>
       <Text style={styles.itemRoute}>
         {formatAdresse(item.adresse_depart)} → {formatAdresse(item.adresse_destination)}
       </Text>
       <Text style={styles.itemType}>
-        {formatTypeCourse(item.type_course)} • {item.tarif_estime} GNF
+        {formatTypeCourse(item.type_vehicule_demande)} • {item.tarif_estime} GNF
       </Text>
       <Text style={styles.itemDate}>
-        {new Date(item.date_demande).toLocaleDateString('fr-FR')} à {' '}
-        {new Date(item.date_demande).toLocaleTimeString('fr-FR', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        })}
+        {item.date_reservation
+          ? `${new Date(item.date_reservation).toLocaleDateString("fr-FR")} à ${new Date(
+              item.date_reservation
+            ).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
+          : "Date non définie"}
       </Text>
     </TouchableOpacity>
   );
 
   if (reservations.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <Text style={styles.title}>Nouvelle Réservation</Text>
         <View style={styles.emptyState}>
           <Ionicons name="car-outline" size={64} color="#ccc" />
@@ -136,22 +137,22 @@ export default function ReservationView({
             Les nouvelles réservations apparaîtront ici
           </Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <Text style={styles.subtitle}>
-        Réservez seulement si vous êtes à proximité du client
+        Touchez une réservation pour voir la position du client
       </Text>
 
-      {/* Liste des réservations disponibles */}
+      {/* Liste des réservations */}
       <View style={styles.listContainer}>
         <Text style={styles.listTitle}>
           Réservations en attente ({reservations.length})
         </Text>
-        
+
         <FlatList
           data={reservations}
           renderItem={renderReservationItem}
@@ -160,108 +161,12 @@ export default function ReservationView({
           showsVerticalScrollIndicator={false}
         />
       </View>
-
-      {/* Détails de la réservation sélectionnée */}
-      {selectedReservation && (
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Détails de la réservation</Text>
-            <TouchableOpacity 
-              onPress={() => onSelectReservation(null)}
-              style={styles.closeButton}
-            >
-              <Ionicons name="close" size={20} color="#666" />
-            </TouchableOpacity>
-          </View>
-          
-          <Text style={styles.clientName}>
-            {selectedReservation.client_nom || "Client"}
-          </Text>
-          
-          <View style={styles.infoRow}>
-            <Ionicons name="location-outline" size={16} color="#666" />
-            <Text style={styles.info}>
-              Départ : <Text style={styles.bold}>{formatAdresse(selectedReservation.adresse_depart)}</Text>
-            </Text>
-          </View>
-          
-          <View style={styles.infoRow}>
-            <Ionicons name="flag-outline" size={16} color="#666" />
-            <Text style={styles.info}>
-              Arrivée : <Text style={styles.bold}>{formatAdresse(selectedReservation.adresse_destination)}</Text>
-            </Text>
-          </View>
-          
-          <View style={styles.infoRow}>
-            <Ionicons name="car-sport-outline" size={16} color="#666" />
-            <Text style={styles.info}>
-              Type : <Text style={styles.bold}>{formatTypeCourse(selectedReservation.type_course)}</Text>
-            </Text>
-          </View>
-          
-          <View style={styles.infoRow}>
-            <Ionicons name="wallet-outline" size={16} color="#666" />
-            <Text style={styles.info}>
-              Paiement : <Text style={styles.bold}>{formatPaiement(selectedReservation.methode_paiement)}</Text>
-            </Text>
-          </View>
-          
-          <View style={styles.infoRow}>
-            <Ionicons name="pricetag-outline" size={16} color="#666" />
-            <Text style={styles.info}>
-              Tarif estimé : <Text style={styles.bold}>{selectedReservation.tarif_estime} GNF</Text>
-            </Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Ionicons name="calendar-outline" size={16} color="#666" />
-            <Text style={styles.info}>
-              Demandé le : <Text style={styles.bold}>
-                {new Date(selectedReservation.date_demande).toLocaleDateString('fr-FR')} à {' '}
-                {new Date(selectedReservation.date_demande).toLocaleTimeString('fr-FR')}
-              </Text>
-            </Text>
-          </View>
-
-          {/* Deux boutons séparés */}
-          <View style={styles.buttonsContainer}>
-            {/* Bouton Voir Position */}
-            <TouchableOpacity
-              style={[styles.button, styles.secondaryButton]}
-              onPress={() => handleVoirPosition(selectedReservation)}
-            >
-              <Ionicons name="map-outline" size={20} color="#f25c3c" />
-              <Text style={styles.secondaryButtonText}>Voir la position du client</Text>
-            </TouchableOpacity>
-
-            {/* Bouton Confirmer */}
-            <TouchableOpacity
-              style={[styles.button, styles.primaryButton, loading && styles.buttonDisabled]}
-              onPress={() => onConfirmer(selectedReservation)}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <>
-                  <Ionicons name="checkmark-circle" size={20} color="#fff" />
-                  <Text style={styles.primaryButtonText}>Confirmer la réservation</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingTop: 20,
-  },
+  container: { flex: 1, backgroundColor: "#fff", paddingTop: 20 },
   title: {
     color: "green",
     fontWeight: "bold",
@@ -276,20 +181,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: 20,
   },
-  listContainer: {
-    flex: 1,
-    marginHorizontal: 20,
-    marginTop: 15,
-  },
-  listTitle: {
-    fontWeight: "bold",
-    fontSize: 16,
-    marginBottom: 10,
-    color: "#333",
-  },
-  list: {
-    flex: 1,
-  },
+  listContainer: { flex: 1, marginHorizontal: 20, marginTop: 15 },
+  listTitle: { fontWeight: "bold", fontSize: 16, marginBottom: 10, color: "#333" },
+  list: { flex: 1 },
   reservationItem: {
     backgroundColor: "#f8f8f8",
     padding: 15,
@@ -298,113 +192,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e0e0e0",
   },
-  selectedItem: {
-    backgroundColor: "#e8f4fd",
-    borderColor: "#2196F3",
-    borderWidth: 2,
-  },
-  itemClient: {
-    fontWeight: "bold",
-    fontSize: 16,
-    color: "#333",
-  },
-  itemRoute: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 4,
-  },
-  itemType: {
-    fontSize: 12,
-    color: "#888",
-    marginTop: 2,
-  },
+  selectedItem: { backgroundColor: "#e8f4fd", borderColor: "#2196F3", borderWidth: 2 },
+  itemClient: { fontWeight: "bold", fontSize: 16, color: "#333" },
+  itemRoute: { fontSize: 14, color: "#666", marginTop: 4 },
+  itemType: { fontSize: 12, color: "#888", marginTop: 2 },
   itemDate: {
     fontSize: 10,
     color: "#999",
     marginTop: 2,
-    fontStyle: 'italic',
-  },
-  card: {
-    backgroundColor: "#f2f2f2",
-    borderRadius: 20,
-    padding: 20,
-    margin: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  cardTitle: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    color: '#333',
-  },
-  closeButton: {
-    padding: 5,
-  },
-  clientName: {
-    fontWeight: "bold",
-    fontSize: 18,
-    marginBottom: 15,
-    color: "#333",
-    textAlign: "center",
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 6,
-  },
-  info: {
-    fontSize: 14,
-    color: "#555",
-    marginLeft: 8,
-    flex: 1,
-  },
-  bold: {
-    fontWeight: "600",
-    color: "#000",
-  },
-  buttonsContainer: {
-    marginTop: 18,
-    gap: 10,
-  },
-  button: {
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  primaryButton: {
-    backgroundColor: "#f25c3c",
-  },
-  secondaryButton: {
-    backgroundColor: "transparent",
-    borderWidth: 2,
-    borderColor: "#f25c3c",
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  primaryButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  secondaryButtonText: {
-    color: "#f25c3c",
-    fontWeight: "bold",
-    fontSize: 16,
-    marginLeft: 8,
+    fontStyle: "italic",
   },
   emptyState: {
     flex: 1,
