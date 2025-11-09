@@ -64,7 +64,6 @@ const TrouveClientContainer = () => {
         const statut="acceptee"
         // Ici, vous appellerez votre API pour confirmer
         await CoursService.updateCourseStatus(reservation.id, statut,chauffeur?.id)
-        // await CoursService.confirmReservation(reservation.id);
   
         // Simulation délai réseau
         await new Promise((resolve) => setTimeout(resolve, 1500));

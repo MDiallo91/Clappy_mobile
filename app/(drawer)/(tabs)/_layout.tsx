@@ -102,8 +102,17 @@ export default function TabLayout() {
       <Tabs.Screen
         name="chauffeur"
         options={{
-          title: 'Chauffeur',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.circle.fill" color={color} />,
+          title: 'Reservation',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="car.fill" color={color} />,
+          href: isChauffeur ? undefined : null, // Visible seulement pour  chauffeur
+        }}
+      />
+      {/* Onglets admin - SEULEMENT visibles pour les chauffeur */}
+      <Tabs.Screen
+        name="courses"
+        options={{
+          title: 'Courses',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
           href: isChauffeur ? undefined : null, // Visible seulement pour  chauffeur
         }}
       />

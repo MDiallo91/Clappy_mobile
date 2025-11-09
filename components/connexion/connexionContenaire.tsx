@@ -40,7 +40,7 @@ function ConnexionContenaire() {
           text1: "Connexion réussie 🎉",
           text2: "Bienvenue sur votre compte !",
         });
-        router.push("/");
+        router.replace("/");
       }
     } catch (err: any) {
       console.error("Erreur détaillée:", err);

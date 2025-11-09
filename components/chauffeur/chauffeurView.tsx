@@ -84,7 +84,7 @@ export default function ReservationView({
 
   // Fonction pour afficher la carte avec les positions
   const handleVoirPosition = (reservation: ApiReservation) => {
-    console.log("🧭 Ouverture de la carte pour :", reservation);
+    // console.log(" Ouverture de la carte pour :", reservation);
     router.push({
       pathname: "/trouveClient",
       params: {
@@ -144,7 +144,7 @@ export default function ReservationView({
   return (
     <View style={styles.container}>
       <Text style={styles.subtitle}>
-        Touchez une réservation pour voir la position du client
+        cliquer une réservation pour voir la position du client
       </Text>
 
       {/* Liste des réservations */}
@@ -197,8 +197,9 @@ const styles = StyleSheet.create({
   itemRoute: { fontSize: 14, color: "#666", marginTop: 4 },
   itemType: { fontSize: 12, color: "#888", marginTop: 2 },
   itemDate: {
-    fontSize: 10,
-    color: "#999",
+    fontSize: 13,
+    fontWeight:"bold",
+    color:"#f25c3c",
     marginTop: 2,
     fontStyle: "italic",
   },
