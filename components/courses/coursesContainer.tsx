@@ -58,7 +58,7 @@ export default function CoursesConetainer() {
         setChauffeur(userData);
         // console.log("le user connecter",userData)
       } catch (err: any) {
-        console.error('Erreur récupération chauffeur:', err);
+        // console.error('Erreur récupération chauffeur:', err);
       } 
     };
     fetchChauffeur();
@@ -70,7 +70,7 @@ export default function CoursesConetainer() {
       try {
         setDataLoading(true);
         const coursesData = await CoursService.getCourseByChauffeur(chauffeur?.id);
-        console.log("Données reçues de l'API qui sont accepter:", coursesData,"de chaffeur",chauffeur?.id);
+        // console.log("Données reçues de l'API qui sont accepter:", coursesData,"de chaffeur",chauffeur?.id);
         
         // Filtrer seulement les réservations avec statut "demandee"
         const reservationsEnAttente = coursesData.filter((item: ApiReservation) => 
@@ -83,7 +83,7 @@ export default function CoursesConetainer() {
         // setSelectedReservation(null); // Laisser null au début
         
       } catch (error) {
-        console.error("Erreur lors de la récupération des courses:", error);
+        // console.error("Erreur lors de la récupération des courses:", error);
         Toast.show({
           type: "error",
           text1: "Erreur",
@@ -100,7 +100,7 @@ export default function CoursesConetainer() {
   const confirmerReservation = async (reservation: ApiReservation) => {
     try {
       setLoading(true);
-      console.log("Confirmation de la réservation:", reservation);
+      // console.log("Confirmation de la réservation:", reservation);
       const statut="terminee"
       // Ici, vous appellerez votre API pour confirmer
       await CoursService.updateCourseStatus(reservation.id, statut,chauffeur?.id)
@@ -120,7 +120,7 @@ export default function CoursesConetainer() {
       // Redirection après confirmation
       // router.push("/");
     } catch (error) {
-      console.error("Erreur confirmation:", error);
+      // console.error("Erreur confirmation:", error);
       Toast.show({
         type: "error",
         text1: "Erreur",

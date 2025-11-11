@@ -23,11 +23,11 @@ export default class VehiculeService {
     }
 
     const tarifs = await response.json();
-    console.log('tarifs récupérés:', tarifs.results);
+    // console.log('tarifs récupérés:', tarifs.results);
     return tarifs.results;
 
   } catch (error) {
-    console.error('Erreur de connexion:', error);
+    // console.error('Erreur de connexion:', error);
     throw error;
   }
 }

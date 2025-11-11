@@ -39,7 +39,7 @@ export default function RootLayout() {
     // Exemple : vérifier si un token utilisateur existe
     AsyncStorage.getItem("auth_token").then(auth_token => {
       setIsAuthenticated(!!auth_token);
-       console.log("Token récupéré :", auth_token);
+      //  console.log("Token récupéré :", auth_token);
     });
   }, []);
 
@@ -47,11 +47,7 @@ export default function RootLayout() {
     return <ActivityIndicator style={{ flex: 1 }} color={primary} />;
   }
 
-  if (!__DEV__) {
-  console.log = () => {};
-  console.warn = () => {};
-  console.error = () => {};
-}
+  
 
   return (
   // <NotificationProvider>

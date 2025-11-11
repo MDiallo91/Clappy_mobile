@@ -36,9 +36,9 @@ const TrouveClientContainer = () => {
         try {
           const userData = await UtilisateurService.getUser(); // récupère l'utilisateur
           setChauffeur(userData);
-          console.log("le user connecter",userData)
+          // console.log("le user connecter",userData)
         } catch (err: any) {
-          console.error('Erreur récupération chauffeur:', err);
+          // console.error('Erreur récupération chauffeur:', err);
         } 
       };
       fetchChauffeur();
@@ -60,7 +60,7 @@ const TrouveClientContainer = () => {
    const confirmerReservation = async (reservation: CourseData) => {
       try {
         setLoading(true);
-        console.log("Confirmation de la réservation:", reservation);
+        // console.log("Confirmation de la réservation:", reservation);
         const statut="acceptee"
         // Ici, vous appellerez votre API pour confirmer
         await CoursService.updateCourseStatus(reservation.id, statut,chauffeur?.id)
@@ -79,7 +79,7 @@ const TrouveClientContainer = () => {
         // Redirection après confirmation
         router.push("/");
       } catch (error) {
-        console.error("Erreur confirmation:", error);
+        // console.error("Erreur confirmation:", error);
         Toast.show({
           type: "error",
           text1: "Erreur",

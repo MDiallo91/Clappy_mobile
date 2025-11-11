@@ -21,7 +21,7 @@ function ConnexionContenaire() {
 
   const onSubmit = async (data: any) => {
     setLoading(true);
-    console.log("Informations saisies :", data);
+    // console.log("Informations saisies :", data);
 
     // Transformer email en username
     const utilisateur = {
@@ -32,7 +32,7 @@ function ConnexionContenaire() {
     try {
       // ✅ CORRECTION : Attendre le résultat complet
       const result = await UtilisateurService.login(utilisateur);
-      console.log("Résultat login:", result);
+      // console.log("Résultat login:", result);
 
       if (result.status === 'success') {
         Toast.show({
@@ -44,7 +44,7 @@ function ConnexionContenaire() {
         router.push("/");
       }
     } catch (err: any) {
-      console.error("Erreur détaillée:", err);
+      // console.error("Erreur détaillée:", err);
       
       //  Message d'erreur 
       let errorMessage = "Email ou mot de passe incorrect.";

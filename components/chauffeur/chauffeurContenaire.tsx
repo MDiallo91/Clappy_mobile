@@ -56,7 +56,7 @@ export default function ReservationContenaire() {
         setChauffeur(userData);
         // console.log("le user connecter",userData)
       } catch (err: any) {
-        console.error('Erreur récupération chauffeur:', err);
+        // console.error('Erreur récupération chauffeur:', err);
       } 
     };
     fetchChauffeur();
@@ -68,7 +68,7 @@ export default function ReservationContenaire() {
       try {
         setDataLoading(true);
         const coursesData = await CoursService.getCourses();
-        console.log("Données reçues de l'API:", coursesData);
+        // console.log("Données reçues de l'API:", coursesData);
         
         // Filtrer seulement les réservations avec statut "demandee"
         const reservationsEnAttente = coursesData.filter((item: ApiReservation) => 
@@ -81,7 +81,7 @@ export default function ReservationContenaire() {
         // setSelectedReservation(null); // Laisser null au début
         
       } catch (error) {
-        console.error("Erreur lors de la récupération des courses:", error);
+        // console.error("Erreur lors de la récupération des courses:", error);
         Toast.show({
           type: "error",
           text1: "Erreur",
@@ -98,7 +98,7 @@ export default function ReservationContenaire() {
   const confirmerReservation = async (reservation: ApiReservation) => {
     try {
       setLoading(true);
-      console.log("Confirmation de la réservation:", reservation);
+      // console.log("Confirmation de la réservation:", reservation);
       const statut="acceptee"
       // Ici, vous appellerez votre API pour confirmer
       await CoursService.updateCourseStatus(reservation.id, statut,chauffeur?.id)
@@ -118,7 +118,7 @@ export default function ReservationContenaire() {
       // Redirection après confirmation
       // router.push("/");
     } catch (error) {
-      console.error("Erreur confirmation:", error);
+      // console.error("Erreur confirmation:", error);
       Toast.show({
         type: "error",
         text1: "Erreur",

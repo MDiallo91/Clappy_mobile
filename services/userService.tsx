@@ -9,10 +9,10 @@ export default class UtilisateurService {
   // Login de l'utilisateur - VERSION CORRIGÉE
   static async login(utilisateur: { username: string; password: string }) {
     try {
-      console.log(' Tentative de connexion avec:', { 
-        username: utilisateur.username,
-        url: `${BASE_URL}login/`
-      });
+      // console.log(' Tentative de connexion avec:', { 
+      //   username: utilisateur.username,
+      //   url: `${BASE_URL}login/`
+      // });
       
       const response = await fetch(`${BASE_URL}login/`, {
         method: "POST",
@@ -26,7 +26,7 @@ export default class UtilisateurService {
         }),
       });
 
-      console.log(' Statut HTTP:', response.status);
+      // console.log(' Statut HTTP:', response.status);
       
       // CORRECTION : Vérifier d'abord si la réponse est OK
       if (!response.ok) {
@@ -46,20 +46,20 @@ export default class UtilisateurService {
 
       // Maintenant on peut parser la réponse JSON
       const data = await response.json();
-      console.log(" Réponse complète:", data);
+      // console.log(" Réponse complète:", data);
 
       // Vérifier le status retourné par le backend
       if (data.status === 'success') {
         // Sauvegarder le token
         if (data.token) {
           await AsyncStorage.setItem("auth_token", data.token);
-          console.log(' Token sauvegardé:', data.token.substring(0, 20) + '...');
+          // console.log(' Token sauvegardé:', data.token.substring(0, 20) + '...');
         }
         
         // Sauvegarder les données utilisateur
         if (data.user) {
           await AsyncStorage.setItem("userData", JSON.stringify(data.user));
-          console.log(' Données utilisateur sauvegardées:', data.user.username);
+          // console.log(' Données utilisateur sauvegardées:', data.user.username);
         }
         
         // Sauvegarder le token de rafraîchissement si disponible
@@ -81,7 +81,7 @@ export default class UtilisateurService {
       }
 
     } catch (error: any) {
-      console.error(" Erreur UtilisateurService login:", error.message || error);
+      // console.error(" Erreur UtilisateurService login:", error.message || error);
       throw error;
     }
   }
@@ -109,7 +109,7 @@ export default class UtilisateurService {
         token: token
       };
     } catch (error) {
-      console.error(' Erreur vérification statut auth:', error);
+      // console.error(' Erreur vérification statut auth:', error);
       return {
         isAuthenticated: false,
         user: null,
@@ -127,13 +127,13 @@ export default class UtilisateurService {
         "refresh_token"
       ]);
       
-      console.log('✅ Déconnexion réussie');
+      // console.log('✅ Déconnexion réussie');
       return {
         status: 'success',
         message: 'Déconnexion réussie'
       };
     } catch (error) {
-      console.error('❌ Erreur déconnexion:', error);
+      // console.error('❌ Erreur déconnexion:', error);
       return {
         status: 'error',
         message: 'Erreur lors de la déconnexion'
@@ -149,7 +149,7 @@ static async addUtilisateur(clientData: {
   password?: string;
 }): Promise<{ data: any; status: number; message: string }> {
   try {
-    console.log(" Envoi des données d'inscription:", clientData);
+    // console.log(" Envoi des données d'inscription:", clientData);
 
     const response = await fetch(`${BASE_URL}clients/`, {
       method: 'POST',
@@ -168,8 +168,8 @@ static async addUtilisateur(clientData: {
       responseData = await response.json();
     }
 
-    console.log("📨 Statut HTTP:", httpStatus);
-    console.log("📨 Réponse brute:", responseData);
+    // console.log("📨 Statut HTTP:", httpStatus);
+    // console.log("📨 Réponse brute:", responseData);
 
     if (response.ok) {
       return {
@@ -189,7 +189,7 @@ static async addUtilisateur(clientData: {
     }
 
   } catch (error) {
-    console.error("❌ Erreur inscription:", error);
+    // console.error("❌ Erreur inscription:", error);
     return {
       data: null,
       status: 500,
@@ -221,7 +221,7 @@ static async getUser(): Promise<any> {
     return users;
 
   } catch (error) {
-    console.error('Erreur de connexion:', error);
+    // console.error('Erreur de connexion:', error);
     throw error;
   }
 }
@@ -231,7 +231,7 @@ static async getUser(): Promise<any> {
 // Dans userService.ts
 static async checkTelephoneExists(telephone: string): Promise<{ exists: boolean }> {
   try {
-    console.log('🔍 Vérification du téléphone:', telephone);
+    // console.log('🔍 Vérification du téléphone:', telephone);
     
     const response = await fetch(`${BASE_URL}check-phone/`, {
       method: "POST",
@@ -249,7 +249,7 @@ static async checkTelephoneExists(telephone: string): Promise<{ exists: boolean 
     if (!contentType || !contentType.includes('application/json')) {
       // Si ce n'est pas du JSON, lire le texte pour debugger
       const textResponse = await response.text();
-      console.error('❌ Réponse non-JSON:', textResponse.substring(0, 200));
+      // console.error('❌ Réponse non-JSON:', textResponse.substring(0, 200));
       throw new Error('Le serveur a retourné une réponse non-JSON');
     }
     
@@ -258,14 +258,14 @@ static async checkTelephoneExists(telephone: string): Promise<{ exists: boolean 
     }
 
     const data = await response.json();
-    console.log("✅ Réponse vérification téléphone:", data);
+    // console.log("✅ Réponse vérification téléphone:", data);
     
     return {
       exists: data.exists || false
     };
 
   } catch (error: any) {
-    console.error("❌ Erreur vérification téléphone:", error.message || error);
+    // console.error("❌ Erreur vérification téléphone:", error.message || error);
     
     // En cas d'erreur, on suppose que le numéro n'existe pas
     return {
@@ -280,6 +280,6 @@ static async checkTelephoneExists(telephone: string): Promise<{ exists: boolean 
       headers: { "Content-Type": "application/json" },
     })
       .then((response) => response.json())
-      console.log("error")
+      // console.log("error")
   }
 }

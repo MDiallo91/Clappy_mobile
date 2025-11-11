@@ -42,9 +42,9 @@ const SearchForm: React.FC<SearchFormProps> = ({
 }) => {
     
     const handleTraceRoute = () => {
-        console.log("🔄 Bouton Suivant cliqué");
-        console.log("Start:", start);
-        console.log("Destination:", destination);
+        // console.log("🔄 Bouton Suivant cliqué");
+        // console.log("Start:", start);
+        // console.log("Destination:", destination);
         
         if (!start || start === "📍 Chargement position..." || start === "📍 Position non disponible") {
             Alert.alert("Point de départ requis", "Veuillez attendre que votre position soit disponible ou sélectionner un point de départ");
@@ -56,7 +56,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
             return;
         }
         
-        console.log("✅ Validation passée, appel de onTraceRoute");
+        // console.log("✅ Validation passée, appel de onTraceRoute");
         onTraceRoute();
     };
 

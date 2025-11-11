@@ -19,16 +19,16 @@ export const fetchSuggestions = async (query: string) => {
             lon: f.geometry.coordinates[0],
         }));
     } catch (error) {
-        console.error("Erreur fetchSuggestions:", error);
+        // console.error("Erreur fetchSuggestions:", error);
         return [];
     }
 };
 
 export const traceRoute = async (startC: any, destC: any) => {
     try {
-        console.log("🔍 Début traceRoute");
-        console.log("📍 Départ reçu:", startC);
-        console.log("🎯 Destination reçue:", destC);
+        // console.log("🔍 Début traceRoute");
+        // console.log("📍 Départ reçu:", startC);
+        // console.log("🎯 Destination reçue:", destC);
         
         // Validation finale
         const startLat = Number(startC.latitude);
@@ -37,21 +37,21 @@ export const traceRoute = async (startC: any, destC: any) => {
         const destLng = Number(destC.longitude);
 
         if (isNaN(startLat) || isNaN(startLng) || isNaN(destLat) || isNaN(destLng)) {
-            console.error("❌ Coordonnées finales invalides");
+            // console.error("❌ Coordonnées finales invalides");
             return null;
         }
 
         const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_API_KEY}&start=${startLng},${startLat}&end=${destLng},${destLat}`;
         
-        console.log("🌐 URL API:", url);
+        // console.log("🌐 URL API:", url);
         
         const response = await fetch(url);
-        console.log("📡 Statut réponse:", response.status);
+        // console.log("📡 Statut réponse:", response.status);
         
         const data = await response.json();
         
         if (!data.features || data.features.length === 0) {
-            console.warn("⚠️ Aucun itinéraire trouvé");
+            // console.warn("⚠️ Aucun itinéraire trouvé");
             Alert.alert("Aucun itinéraire", "Impossible de trouver un chemin entre ces points");
             return null;
         }
@@ -66,12 +66,12 @@ export const traceRoute = async (startC: any, destC: any) => {
         const distance = (summary.distance / 1000).toFixed(2) + " km";
         const duration = Math.ceil(summary.duration / 60) + " min";
 
-        console.log("✅ Itinéraire calculé:", { distance, duration });
+        // console.log("✅ Itinéraire calculé:", { distance, duration });
         
         return { coords, distance, duration };
         
     } catch (error) {
-        console.error("❌ Erreur traceRoute:", error);
+        // console.error("❌ Erreur traceRoute:", error);
         Alert.alert("Erreur", "Problème de connexion au service");
         return null;
     }

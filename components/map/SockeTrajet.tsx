@@ -26,5 +26,5 @@ export const saveTrajet = async (
     trajets.push(newTrajet);
     await AsyncStorage.setItem("trajets", JSON.stringify(trajets));
     
-    console.log("💾 Trajet enregistré:", newTrajet);
+    // console.log("💾 Trajet enregistré:", newTrajet);
 };

@@ -63,7 +63,7 @@ export default function TrouveClientView({
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          console.log("Permission refusée");
+          // console.log("Permission refusée");
           setLocationLoading(false);
           return;
         }
@@ -87,7 +87,7 @@ export default function TrouveClientView({
           );
         }
       } catch (error) {
-        console.error("Erreur de localisation :", error);
+        // console.error("Erreur de localisation :", error);
         setLocationLoading(false);
       }
     };

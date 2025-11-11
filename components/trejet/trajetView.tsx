@@ -34,7 +34,7 @@ export default function TrajetScreen() {
     const fetchTrajets = async () => {
       const data = await AsyncStorage.getItem("trajets");
       if (data) setTrajets(JSON.parse(data));
-      console.log("les donnee enregister dans le storage",data)
+      // console.log("les donnee enregister dans le storage",data)
     };
     fetchTrajets();
   }, []);

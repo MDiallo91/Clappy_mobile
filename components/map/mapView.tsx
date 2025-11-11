@@ -74,7 +74,7 @@ interface Suggestion {
 // Fonction pour obtenir l'adresse à partir des coordonnées
 const getAddressFromCoords = async (coords: Coordonnees): Promise<string> => {
     try {
-        console.log(" Reverse geocoding pour:", coords);
+        // console.log(" Reverse geocoding pour:", coords);
         const addresses = await Location.reverseGeocodeAsync({
             latitude: coords.latitude,
             longitude: coords.longitude
@@ -82,7 +82,7 @@ const getAddressFromCoords = async (coords: Coordonnees): Promise<string> => {
         
         if (addresses && addresses.length > 0) {
             const address = addresses[0];
-            console.log(" Résultat reverse geocoding:", address);
+            // console.log(" Résultat reverse geocoding:", address);
             
             const addressParts = [
                 address.name,
@@ -95,7 +95,7 @@ const getAddressFromCoords = async (coords: Coordonnees): Promise<string> => {
             
             if (addressParts.length > 0) {
                 const formattedAddress = addressParts.join(', ');
-                console.log(" Adresse formatée:", formattedAddress);
+                // console.log(" Adresse formatée:", formattedAddress);
                 return formattedAddress;
             }
         }
@@ -293,7 +293,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                 setTransformedTarifs(transformed);
                 // console.log(" Véhicules transformés:", transformed.length);
             } catch (error) {
-                console.error(" Erreur lors de la récupération des tarifs:", error);
+                // console.error(" Erreur lors de la récupération des tarifs:", error);
             }
         };
         fetchTarifs();
@@ -354,7 +354,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
             
             type === "start" ? setStartSuggestions(suggestions) : setDestSuggestions(suggestions);
         } catch (error) {
-            console.error(" Erreur lors de la récupération des suggestions:", error);
+            // console.error(" Erreur lors de la récupération des suggestions:", error);
         }
     };
 
@@ -565,7 +565,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
             }, 500);
             
         } catch (error) {
-            console.error(" Erreur lors de la sélection du véhicule:", error);
+            // console.error(" Erreur lors de la sélection du véhicule:", error);
             Alert.alert("Erreur", "Impossible de finaliser la réservation");
         }
     };

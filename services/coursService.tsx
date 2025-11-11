@@ -10,7 +10,7 @@ static async addCourse(course: any): Promise<{ data: any; status: number; messag
       return { data: null, status: 401, message: "Token d'authentification manquant" };
     }
 
-    console.log("Envoi de la course:", course);
+    // console.log("Envoi de la course:", course);
 
     const response = await fetch(`${BASE_URL}courses/`, {
       method: 'POST',
@@ -29,7 +29,7 @@ static async addCourse(course: any): Promise<{ data: any; status: number; messag
       responseData = await response.json();
     }
 
-    console.log("Réponse du backend:", responseData);
+    // console.log("Réponse du backend:", responseData);
 
     if (response.ok) {
       return { data: responseData, status: httpStatus, message: "Cours ajouté avec succès" };
@@ -42,7 +42,7 @@ static async addCourse(course: any): Promise<{ data: any; status: number; messag
     }
 
   } catch (error: any) {
-    console.error("Erreur réseau:", error);
+    // console.error("Erreur réseau:", error);
     return {
       data: null,
       status: 500,
@@ -70,11 +70,11 @@ static async getCourses(): Promise<any[]> {
     }
 
     const courses = await response.json();
-    console.log('courses récupérés:', courses.results);
+    // console.log('courses récupérés:', courses.results);
     return courses.results;
 
   } catch (error) {
-    console.error('Erreur de connexion:', error);
+    // console.error('Erreur de connexion:', error);
     throw error;
   }
 }
@@ -103,11 +103,11 @@ static async getCourseByChauffeur(id:number): Promise<any[]> {
     }
 
     const courses = await response.json();
-    console.log('courses récupérés:', courses.results);
+    // console.log('courses récupérés:', courses.results);
     return courses.results;
 
   } catch (error) {
-    console.error('Erreur de connexion:', error);
+    // console.error('Erreur de connexion:', error);
     throw error;
   }
 }
@@ -200,7 +200,7 @@ static async getCourseByChauffeur(id:number): Promise<any[]> {
   // }
   static async updateCourseStatus(id:any, status:string, chauffeurId?:any) {
   try {
-    console.log(`Mise à jour statut course ${id} → ${status}`);
+    // console.log(`Mise à jour statut course ${id} → ${status}`);
 
     let url = `${BASE_URL}courses/${id}/`;
     let method = 'PATCH';
@@ -232,10 +232,10 @@ static async getCourseByChauffeur(id:number): Promise<any[]> {
     });
 
     const data = await response.json();
-    console.log("📨 Réponse API:", data);
+    // console.log("📨 Réponse API:", data);
     return data;
   } catch (error) {
-    console.error("❌ Erreur updateCourseStatus:", error);
+    // console.error("❌ Erreur updateCourseStatus:", error);
   }
 }
 

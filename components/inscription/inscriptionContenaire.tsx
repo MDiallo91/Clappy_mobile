@@ -63,13 +63,13 @@ export default function InscriptionContainer() {
 // Étape 2 : Création du compte
 const onSubmit = async (data: any) => {
   setLoading(true);
-  console.log(" Données du formulaire:", data);
+  // console.log(" Données du formulaire:", data);
   
   try {
     // Utiliser le service corrigé
     const response = await UtilisateurService.addUtilisateur(data);
     
-    console.log(" Réponse du service:", response);
+    // console.log(" Réponse du service:", response);
     
     if (response.status === 200 || response.status === 201) {
       Toast.show({ 
@@ -106,7 +106,7 @@ const onSubmit = async (data: any) => {
       }
     }
   } catch (error: any) {
-    console.error("❌ Erreur catch:", error);
+    // console.error("❌ Erreur catch:", error);
     Toast.show({ 
       type: "error", 
       text1: "Erreur", 

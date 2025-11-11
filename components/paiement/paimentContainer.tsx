@@ -44,7 +44,7 @@ function PaimentContainer() {
             setUserData(parsedData);
           }
         } catch (error) {
-          console.error("Erreur récupération userData:", error);
+          // console.error("Erreur récupération userData:", error);
         } finally {
           setLoading(false);
         }
@@ -78,7 +78,7 @@ function PaimentContainer() {
     setLoading(true);
     try {
 
-      console.log('Envoi de la course au backend:', courseData);
+      // console.log('Envoi de la course au backend:', courseData);
 
       const courseToSend = {
         client: userData?.client_id, // 
@@ -96,12 +96,12 @@ function PaimentContainer() {
         longitude_destination: parseFloat(courseData.destLng),
       };
 
-      console.log('Données envoyées au backend:', courseToSend);
+      // console.log('Données envoyées au backend:', courseToSend);
 
       const result = await CoursService.addCourse(courseToSend);
       
-      console.log("✅ Course créée - Statut:", result.status);
-      console.log("📦 Données reçues:", result.data);
+      // console.log("✅ Course créée - Statut:", result.status);
+      // console.log("📦 Données reçues:", result.data);
 
       if (result.status === 201 || result.status === 200) {
         // Afficher la modal de confirmation
@@ -112,7 +112,7 @@ function PaimentContainer() {
       }
 
     } catch (error: any) {
-      console.error(' Erreur création course:', error);
+      // console.error(' Erreur création course:', error);
       alert('Erreur lors de la création de la course: ' + error.message);
     } finally {
       setLoading(false);

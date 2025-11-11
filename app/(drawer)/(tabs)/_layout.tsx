@@ -36,7 +36,7 @@ export default function TabLayout() {
           setUserData(parsedData);
         }
       } catch (error) {
-        console.error("Erreur récupération userData:", error);
+        // console.error("Erreur récupération userData:", error);
       } finally {
         setLoading(false);
       }
@@ -53,7 +53,7 @@ export default function TabLayout() {
       </View>
     );
   }
-  console.log("les dataUser pour verification",userData)
+  // console.log("les dataUser pour verification",userData)
   // CORRECTION : Vérifier le rôle au lieu du username
   const isAdmin = userData?.role === "admin";
   const isClient = userData?.role === "client";
