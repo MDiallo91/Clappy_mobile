@@ -47,6 +47,12 @@ export default function RootLayout() {
     return <ActivityIndicator style={{ flex: 1 }} color={primary} />;
   }
 
+  if (!__DEV__) {
+  console.log = () => {};
+  console.warn = () => {};
+  console.error = () => {};
+}
+
   return (
   // <NotificationProvider>
   <>
@@ -56,7 +62,7 @@ export default function RootLayout() {
       ) : (
         <Stack.Screen name="connexion" options={{ headerShown: false }} />
       )}
-      <Stack.Screen name="inscription" options={{ headerShown: true }} />
+      <Stack.Screen name="inscription" options={{ headerShown: false }} />
     </Stack>
     <Toast />
     <StatusBar style="dark" />

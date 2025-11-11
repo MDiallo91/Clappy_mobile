@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { Controller } from "react-hook-form";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 
 const primary = "#EE6841";
 const { width } = Dimensions.get("window");
@@ -40,19 +42,18 @@ export default function ConnexionView({
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={styles.title}>Bienvenue </Text>
+        {/* <Text style={styles.title}>Bienvenue </Text> */}
         <Text style={styles.subtitle}>Connectez-vous à votre compte</Text>
       </View>
 
       {/* Champ Email */}
       <View style={styles.form}>
-        <Text style={styles.label}>Adresse email</Text>
+        <Text style={styles.label}>Telephone ou username</Text>
         <Controller
           control={control}
           name="email"
           rules={{
-            // required: "L’email est obligatoire",
-            // pattern: { value: /^\S+@\S+$/i, message: "Adresse email invalide" },
+            
           }}
           render={({ field: { onChange, value } }) => (
             <TextInput
@@ -61,7 +62,7 @@ export default function ConnexionView({
               style={styles.input}
               onChangeText={onChange}
               value={value}
-              placeholder="exemple@email.com"
+              placeholder="Votre numéro de telephone"
               placeholderTextColor="#aaa"
             />
           )}
@@ -69,29 +70,47 @@ export default function ConnexionView({
         {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
 
         {/* Champ Mot de passe */}
-        <Text style={styles.label}>Mot de passe</Text>
-        <Controller
-          control={control}
-          name="password"
-          rules={{
-            required: "Le mot de passe est obligatoire",
-            minLength: {
-              value: 2,
-              message: "Le mot de passe doit contenir au moins 6 caractères",
-            },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              secureTextEntry
-              style={styles.input}
-              onChangeText={onChange}
-              value={value}
-              placeholder="••••••••"
-              placeholderTextColor="#aaa"
-            />
-          )}
+       {/* Champ Mot de passe */}
+<Text style={styles.label}>Mot de passe</Text>
+<Controller
+  control={control}
+  name="password"
+  rules={{
+    required: "Le mot de passe est obligatoire",
+    minLength: {
+      value: 4,
+      message: "Le mot de passe doit contenir au moins 4 caractères",
+    },
+  }}
+  render={({ field: { onChange, value } }) => {
+    const [showPassword, setShowPassword] = useState(false);
+
+    return (
+      <View style={styles.passwordContainer}>
+        <TextInput
+          secureTextEntry={!showPassword}
+          style={[styles.input, { flex: 1, marginBottom: 0 }]}
+          onChangeText={onChange}
+          value={value}
+          placeholder="••••••••"
+          placeholderTextColor="#aaa"
         />
-        {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+        <TouchableOpacity
+          onPress={() => setShowPassword(!showPassword)}
+          style={styles.eyeButton}
+        >
+          <Ionicons
+            name={showPassword ? "eye-off" : "eye"}
+            size={22}
+            color={primary}
+          />
+        </TouchableOpacity>
+      </View>
+    );
+  }}
+/>
+{errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+
 
         {/* Bouton Connexion */}
         <TouchableOpacity
@@ -114,6 +133,9 @@ export default function ConnexionView({
           </TouchableOpacity>
         </View>
       </View>
+     
+      <Text style={styles.copy}>&copy; Baobit SARL 2025</Text>
+
     </ScrollView>
   );
 }
@@ -121,7 +143,7 @@ export default function ConnexionView({
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "black",
     alignItems: "center",
     paddingVertical: 40,
   },
@@ -130,7 +152,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   logo: {
-    width: width * 0.4,
+    width: width * 0.8,
     height: width * 0.4,
     marginBottom: 10,
   },
@@ -140,9 +162,14 @@ const styles = StyleSheet.create({
     color: primary,
   },
   subtitle: {
-    fontSize: 15,
-    color: "#555",
+    fontSize: 12,
+    color: "white",
     marginTop: 5,
+  },
+  copy: {
+    fontSize: 15,
+    color: "gray",
+    marginTop: 150,
   },
   form: {
     width: "90%",
@@ -200,4 +227,17 @@ const styles = StyleSheet.create({
     color: primary,
     fontWeight: "bold",
   },
+  passwordContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  borderWidth: 1,
+  borderColor: "#ccc",
+  borderRadius: 8,
+  backgroundColor: "white",
+  paddingRight: 10,
+  marginBottom: 25,
+},
+eyeButton: {
+  paddingHorizontal: 8,
+},
 });

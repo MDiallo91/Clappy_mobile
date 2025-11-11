@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "black",
   },
   logoContainer: {
     alignItems: "center",
@@ -192,8 +192,8 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 220,
+    height: 160,
   },
   title: {
     fontSize: 24,
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 15,
     fontWeight: "500",
-    color: "#333",
+    color: "white",
     marginBottom: 5,
   },
   input: {

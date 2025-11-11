@@ -40,12 +40,13 @@ function ConnexionContenaire() {
           text1: "Connexion réussie 🎉",
           text2: "Bienvenue sur votre compte !",
         });
-        router.replace("/");
+        router.push("/inscription");
+        router.push("/");
       }
     } catch (err: any) {
       console.error("Erreur détaillée:", err);
       
-      // CORRECTION : Message d'erreur plus spécifique
+      //  Message d'erreur 
       let errorMessage = "Email ou mot de passe incorrect.";
       
       if (err.message.includes("401") || err.message.includes("Authentication")) {
