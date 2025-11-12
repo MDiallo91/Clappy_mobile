@@ -123,7 +123,7 @@ function PaimentContainer() {
   const handleCloseConfirmation = () => {
     setShowConfirmation(false);
     // Rediriger vers l'écran d'accueil ou de suivi de course
-    router.push('/');
+    router.push('/(drawer)/home');
   };
 
   return (

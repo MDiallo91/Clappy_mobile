@@ -37,7 +37,7 @@ export default function SettingScreen() {
       </View>
 
       {/*  Préférences */}
-      <View style={styles.section}>
+      {/* <View style={styles.section}>
         <Text style={styles.sectionTitle}>Préférences</Text>
 
         <TouchableOpacity style={styles.item}>
@@ -49,10 +49,10 @@ export default function SettingScreen() {
           <MaterialIcons name="payment" size={22} color="#EE6841" />
           <Text style={styles.itemText}>Mode de paiement</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/*  Confidentialité */}
-      <View style={styles.section}>
+      {/* <View style={styles.section}>
         <Text style={styles.sectionTitle}>Confidentialité</Text>
 
         <View style={styles.switchRow}>
@@ -78,7 +78,7 @@ export default function SettingScreen() {
             thumbColor={location ? "#EE6841" : "#ccc"}
           />
         </View>
-      </View>
+      </View> */}
 
       {/*  Support */}
       <View style={styles.section}>
