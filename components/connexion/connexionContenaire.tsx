@@ -40,8 +40,7 @@ function ConnexionContenaire() {
           text1: "Connexion réussie 🎉",
           text2: "Bienvenue sur votre compte !",
         });
-        router.push("/inscription");
-        router.push("/");
+        router.replace("/(drawer)/home");
       }
     } catch (err: any) {
       // console.error("Erreur détaillée:", err);

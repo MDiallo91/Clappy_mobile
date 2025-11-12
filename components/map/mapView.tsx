@@ -134,7 +134,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
     const [user, setUser] = useState<any>([]);
     const [tarifs, setTarifs] = useState<any>([]);
     const [transformedTarifs, setTransformedTarifs] = useState<Vehicule[]>([]);
-    const params = useLocalSearchParams();
+    const params = useLocalSearchParams();   
     
    // Récupération de la position actuelle avec reverse geocoding
     useEffect(() => {
@@ -197,18 +197,6 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
             }
         })();
     }, []);
-
-    // useEffect(() => {
-    //     const fetchUsers = async () => {
-    //         try {
-    //             const users = await UtilisateurService.getUsers();
-    //             setUser(users);
-    //         } catch (error) {
-    //             console.error("Erreur lors de la récupération des users:", error);
-    //         }
-    //     };
-    //     fetchUsers();
-    // }, []);
 
     // Récupération et transformation des tarifs
     useEffect(() => {

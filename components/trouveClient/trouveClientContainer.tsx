@@ -63,7 +63,7 @@ const TrouveClientContainer = () => {
         // console.log("Confirmation de la réservation:", reservation);
         const statut="acceptee"
         // Ici, vous appellerez votre API pour confirmer
-        await CoursService.updateCourseStatus(reservation.id, statut,chauffeur?.id)
+        await CoursService.updateCourseStatus(reservation.id, statut,chauffeur?.chaffeur_id)
   
         // Simulation délai réseau
         await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -77,7 +77,7 @@ const TrouveClientContainer = () => {
           // prev.filter((item) => item.id !== reservation.id)
         // );
         // Redirection après confirmation
-        router.push("/");
+        router.push("/(drawer)/home");
       } catch (error) {
         // console.error("Erreur confirmation:", error);
         Toast.show({

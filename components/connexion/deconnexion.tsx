@@ -20,9 +20,9 @@ export default function LogoutModal({ visible, onClose }: LogoutModalProps) {
     try {
       await AsyncStorage.removeItem("auth_token");
       await AsyncStorage.removeItem("dataUser");
-      // console.log("Token supprimé ✅");
-      onClose();
-      router.replace("/connexion");
+      // console.log("Token supprimé ");
+      onClose(); 
+      router.replace("/(auth)/index");
     } catch (error) {
       // console.error("Erreur lors de la déconnexion :", error);
     }

@@ -77,7 +77,7 @@ const onSubmit = async (data: any) => {
         text1: "Compte créé avec succès!",
         text2: "Vous pouvez maintenant vous connecter" 
       });
-      router.push("/connexion");
+      router.push("/(auth)/index");
     } else {
       // Gérer les erreurs spécifiques
       const errorMessage = response.message.toLowerCase();

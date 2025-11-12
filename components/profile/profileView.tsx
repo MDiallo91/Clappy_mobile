@@ -16,20 +16,20 @@ export default function ProfilScreen() {
         try {
           const userData = await UtilisateurService.getUser(); // récupère l'utilisateur
           setChauffeur(userData);
-          console.log("le user connecter",userData)
+          // console.log("le user connecter",userData)
         } catch (err: any) {
-          console.error('Erreur récupération chauffeur:', err);
+          // console.error('Erreur récupération chauffeur:', err);
         } 
       };
       fetchChauffeur();
     }, []);
   
   const handleEditProfile = () => {
-    console.log("Modifier le profil");
+    // console.log("Modifier le profil");
   };
 
   const handleChangePhoto = () => {
-    console.log("Changer la photo");
+    // console.log("Changer la photo");
   };
 
   return (
@@ -46,7 +46,7 @@ export default function ProfilScreen() {
       {/* Photo de profil + icône caméra */}
       <View style={styles.imageContainer}>
         <Image
-          source={require("@/assets/images/profile.jpg")}
+          source={require("@/assets/images/profile.jpeg")}
           style={styles.profileImage}
           contentFit="cover"
         />
