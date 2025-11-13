@@ -54,7 +54,7 @@ export default function ReservationContenaire() {
       try {
         const userData = await UtilisateurService.getUser(); // récupère l'utilisateur
         setChauffeur(userData);
-        // console.log("le user connecter",userData)
+        console.log("le user connecter",userData)
       } catch (err: any) {
         // console.error('Erreur récupération chauffeur:', err);
       } 

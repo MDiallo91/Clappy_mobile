@@ -205,7 +205,6 @@ static async getCourseByChauffeur(id:number): Promise<any[]> {
     let url = `${BASE_URL}courses/${id}/`;
     let method = 'PATCH';
     let bodyData = {};
-
     if (status === 'acceptee' && chauffeurId) {
       url += 'accepter/';
       method = 'POST';
