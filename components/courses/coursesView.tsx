@@ -26,7 +26,7 @@ interface ApiReservation {
   date_acceptation: string | null;
   date_debut: string | null;
   date_fin: string | null;
-  date_reservation: string | null;
+  date_reservation: string ;
   distance_estimee: string | null;
   duree_estimee: string | null;
   duree_totale: string | null;
@@ -160,7 +160,7 @@ export default function CoursesView({
           </View>
           
           <Text style={styles.clientName}>
-            {selectedReservation.client_nom || "Client"}
+            {selectedReservation.client_nom_complet || "Client"}
           </Text>
           
           <View style={styles.infoRow}>
@@ -202,8 +202,8 @@ export default function CoursesView({
             <Ionicons name="calendar-outline" size={16} color="#666" />
             <Text style={styles.info}>
               Demandé le : <Text style={styles.bold}>
-                {new Date(selectedReservation.date_demande).toLocaleDateString('fr-FR')} à {' '}
-                {new Date(selectedReservation.date_demande).toLocaleTimeString('fr-FR')}
+                {new Date(selectedReservation.date_reservation).toLocaleDateString('fr-FR')} à {' '}
+                {new Date(selectedReservation.date_reservation).toLocaleTimeString('fr-FR')}
               </Text>
             </Text>
           </View>

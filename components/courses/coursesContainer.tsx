@@ -27,7 +27,7 @@ interface ApiReservation {
   date_acceptation: string | null;
   date_debut: string | null;
   date_fin: string | null;
-  date_reservation: string | null;
+  date_reservation: string ;
   distance_estimee: string | null;
   duree_estimee: string | null;
   duree_totale: string | null;
