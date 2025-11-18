@@ -84,5 +84,6 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
-
+# //google service
+clappy_service_acount.json
 # @end expo-cli

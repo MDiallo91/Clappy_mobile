@@ -215,6 +215,8 @@ const styles = StyleSheet.create({
   },
   footer: {
     flexDirection: "row",
+    // flexWrap: "wrap",
+    flexShrink: 1,
     justifyContent: "center",
     marginTop: 20,
   },

@@ -581,7 +581,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                 }}
                 showsUserLocation
                 showsMyLocationButton
-                 provider={undefined}
+                //  provider={undefined}
             >
                 {startCoord && (
                     <Marker coordinate={startCoord} title="Départ">

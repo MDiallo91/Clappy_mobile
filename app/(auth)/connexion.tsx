@@ -6,7 +6,7 @@ import { ThemedView } from '@/components/themed-view';
 import ConnexionContenaire from '@/components/connexion/connexionContenaire';
 import React from 'react';
 
-export default function ModalScreen() {
+export default function Connexion() {
   return (
    <ConnexionContenaire/>
   );

@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from "react";
 import ReservationView from "./chauffeurView";
 import Toast from "react-native-toast-message";
-import { router } from "expo-router";
 import CoursService from "@/services/coursService";
-import { ActivityIndicator, View, Text, StyleSheet } from "react-native";
 import UtilisateurService from "@/services/userService";
+import { ActivityIndicator, View, Text, StyleSheet } from "react-native";
 
+const primary = "#EE6841";
 
-  const primary = "#EE6841";
-
-
-
-// Interface basée sur votre API
 interface ApiReservation {
   id: number;
   adresse_depart: string;
@@ -38,87 +33,113 @@ interface ApiReservation {
   client_nom_complet: string;
   tarif_final: string | null;
   url: string;
-  type_vehicule_demande:string
+  type_vehicule_demande: string;
 }
 
 export default function ReservationContenaire() {
   const [loading, setLoading] = useState(false);
-  const [dataLoading, setDataLoading] = useState(true); // Nouvel état pour le chargement des données
+  const [dataLoading, setDataLoading] = useState(true);
   const [reservations, setReservations] = useState<ApiReservation[]>([]);
   const [selectedReservation, setSelectedReservation] = useState<ApiReservation | null>(null);
-  const [chauffeur,setChauffeur] = useState<any>()
+  const [chauffeur, setChauffeur] = useState<any>();
 
-  //Recuperer le chauffeur connecter
- useEffect(() => {
+  useEffect(() => {
     const fetchChauffeur = async () => {
       try {
-        const userData = await UtilisateurService.getUser(); // récupère l'utilisateur
+        const userData = await UtilisateurService.getUser();
         setChauffeur(userData);
-        console.log("le user connecter",userData)
-      } catch (err: any) {
-        // console.error('Erreur récupération chauffeur:', err);
-      } 
+      } catch (err) {}
     };
     fetchChauffeur();
   }, []);
 
-  // Récupération des courses en attente
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        setDataLoading(true);
-        const coursesData = await CoursService.getCourses();
-        // console.log("Données reçues de l'API:", coursesData);
-        
-        // Filtrer seulement les réservations avec statut "demandee"
-        const reservationsEnAttente = coursesData.filter((item: ApiReservation) => 
-          item.statut === "demandee"
-        );
-        
-        setReservations(reservationsEnAttente);
-        
-        // NE PAS sélectionner automatiquement la première réservation
-        // setSelectedReservation(null); // Laisser null au début
-        
-      } catch (error) {
-        // console.error("Erreur lors de la récupération des courses:", error);
-        Toast.show({
-          type: "error",
-          text1: "Erreur",
-          text2: "Impossible de charger les réservations",
-        });
-      } finally {
-        setDataLoading(false);
-      }
-    };
+  // const fetchReservations = async () => {
+  //   try {
+  //     const coursesData = await CoursService.getCourses();
+  //     // console.log("les courses:", courseData)
+  //     const reservationsEnAttente = coursesData.filter(
+  //       (item: ApiReservation) => item.statut === "demandee"
+  //     );
+
+  //     setReservations(reservationsEnAttente);
+  //   } catch (error) {
+  //     Toast.show({
+  //       type: "error",
+  //       text1: "Erreur",
+  //       text2: "Impossible de charger les réservations",
+  //     });
+  //   }
+  // };
+const fetchReservations = async () => {
+  try {
+    const coursesData = await CoursService.getCourses();
+    // console.log("les courses", coursesData);
     
-    fetchCourses();
+    // Obtenir la date d'aujourd'hui (sans l'heure)
+    const aujourdhui = new Date();
+    aujourdhui.setHours(0, 0, 0, 0);
+    
+    const reservationsEnAttente = coursesData.filter(
+      (item: ApiReservation) => {
+        // Vérifier le statut
+        if (item.statut !== "demandee") return false;
+        
+        // Vérifier si la date de réservation est aujourd'hui
+        if (item.date_reservation) {
+          const dateReservation = new Date(item.date_reservation);
+          dateReservation.setHours(0, 0, 0, 0); // Normaliser l'heure
+          return dateReservation.getTime() === aujourdhui.getTime();
+        }
+        
+        return false;
+      }
+    );
+
+    setReservations(reservationsEnAttente);
+  } catch (error) {
+    Toast.show({
+      type: "error",
+      text1: "Erreur",
+      text2: "Impossible de charger les réservations",
+    });
+  }
+};
+
+  // Chargement initial
+  useEffect(() => {
+    const loadData = async () => {
+      setDataLoading(true);
+      await fetchReservations();
+      setDataLoading(false);
+    };
+
+    loadData();
   }, []);
+
+  // 👈 fonction utilisée pour le Pull-to-Refresh
+  const refreshReservations = async () => {
+    await fetchReservations();
+  };
 
   const confirmerReservation = async (reservation: ApiReservation) => {
     try {
       setLoading(true);
-      // console.log("Confirmation de la réservation:", reservation);
-      const statut="acceptee"
-      // Ici, vous appellerez votre API pour confirmer
-      await CoursService.updateCourseStatus(reservation.id, statut,chauffeur?.id)
-      // await CoursService.confirmReservation(reservation.id);
+      const statut = "acceptee";
 
-      // Simulation délai réseau
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await CoursService.updateCourseStatus(
+        reservation.id,
+        statut,
+        chauffeur?.id
+      );
 
       Toast.show({
         type: "success",
         text1: "Réservation confirmée 🎉",
-        text2: `Départ : ${reservation.adresse_depart} ➜ ${reservation.adresse_destination}`,
+        text2: `${reservation.adresse_depart} ➜ ${reservation.adresse_destination}`,
       });
-         setReservations((prev) =>
-        prev.filter((item) => item.id !== reservation.id)
-      );
-      // Redirection après confirmation
-      // router.push("/");
+
+      setReservations((prev) => prev.filter((item) => item.id !== reservation.id));
     } catch (error) {
-      // console.error("Erreur confirmation:", error);
       Toast.show({
         type: "error",
         text1: "Erreur",
@@ -129,7 +150,6 @@ export default function ReservationContenaire() {
     }
   };
 
-  // Afficher le loader pendant le chargement des données
   if (dataLoading) {
     return (
       <View style={styles.loaderContainer}>
@@ -146,6 +166,7 @@ export default function ReservationContenaire() {
       loading={loading}
       onConfirmer={confirmerReservation}
       onSelectReservation={setSelectedReservation}
+      onRefresh={refreshReservations}   // 👈 AJOUT ESSENTIEL
     />
   );
 }
@@ -160,6 +181,6 @@ const styles = StyleSheet.create({
   loaderText: {
     marginTop: 10,
     fontSize: 16,
-    color: "black"
+    color: "black",
   },
 });

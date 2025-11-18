@@ -36,7 +36,7 @@ export default function InscriptionContainer() {
         setStep(2);
         Toast.show({ 
           type: "success", 
-          text1: "Numéro disponible" 
+          text1: "Donnez le reste des informations" 
         });
       } else {
         // Le numéro existe déjà
@@ -63,7 +63,7 @@ export default function InscriptionContainer() {
 // Étape 2 : Création du compte
 const onSubmit = async (data: any) => {
   setLoading(true);
-  // console.log(" Données du formulaire:", data);
+  console.log(" Données du formulaire:", data);
   
   try {
     // Utiliser le service corrigé
@@ -77,7 +77,7 @@ const onSubmit = async (data: any) => {
         text1: "Compte créé avec succès!",
         text2: "Vous pouvez maintenant vous connecter" 
       });
-      router.push("/(auth)/index");
+      router.push("/(auth)/connexion");
     } else {
       // Gérer les erreurs spécifiques
       const errorMessage = response.message.toLowerCase();

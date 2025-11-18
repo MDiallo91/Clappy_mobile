@@ -45,7 +45,7 @@ export default function TabLayout() {
     getUserData();
   }, []);
 
-  // console.log("le role du user lorem upsun",userData?.user.role)
+  console.log("le role du user lorem upsun",userData)
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -69,7 +69,7 @@ export default function TabLayout() {
     >
       {/* Onglets toujours visibles pour tous */}
       <Tabs.Screen
-        name="home"
+        name="index"
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,

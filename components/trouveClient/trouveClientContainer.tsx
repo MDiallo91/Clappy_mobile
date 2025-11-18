@@ -77,7 +77,7 @@ const TrouveClientContainer = () => {
           // prev.filter((item) => item.id !== reservation.id)
         // );
         // Redirection après confirmation
-        router.push("/(drawer)/home");
+        router.push("/");
       } catch (error) {
         // console.error("Erreur confirmation:", error);
         Toast.show({

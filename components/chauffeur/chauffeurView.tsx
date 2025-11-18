@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useState } from "react"; 
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
   FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -46,6 +45,7 @@ interface Props {
   loading: boolean;
   onConfirmer: (reservation: ApiReservation) => void;
   onSelectReservation: (reservation: ApiReservation | null) => void;
+  onRefresh: () => Promise<void>; // 👈 AJOUT
 }
 
 export default function ReservationView({
@@ -54,8 +54,17 @@ export default function ReservationView({
   loading,
   onConfirmer,
   onSelectReservation,
+  onRefresh,
 }: Props) {
-  // Fonction pour formater les adresses et autres infos
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await onRefresh();
+    setRefreshing(false);
+  };
+
   const formatAdresse = (adresse: string): string => {
     if (adresse.includes("+")) {
       const parts = adresse.split(", ");
@@ -73,18 +82,7 @@ export default function ReservationView({
     return types[type] || type;
   };
 
-  const formatPaiement = (methode: string): string => {
-    const methodes: Record<string, string> = {
-      mobile_money: "Mobile Money",
-      cash: "Espèces",
-      card: "Carte",
-    };
-    return methodes[methode] || methode;
-  };
-
-  // Fonction pour afficher la carte avec les positions
   const handleVoirPosition = (reservation: ApiReservation) => {
-    // console.log(" Ouverture de la carte pour :", reservation);
     router.push({
       pathname: "/trouveClient",
       params: {
@@ -100,7 +98,6 @@ export default function ReservationView({
     });
   };
 
-  // ✅ Dès qu'on clique sur une réservation, on ouvre directement la carte
   const renderReservationItem = ({ item }: { item: ApiReservation }) => (
     <TouchableOpacity
       style={[
@@ -147,7 +144,6 @@ export default function ReservationView({
         cliquer une réservation pour voir la position du client
       </Text>
 
-      {/* Liste des réservations */}
       <View style={styles.listContainer}>
         <Text style={styles.listTitle}>
           Réservations en attente ({reservations.length})
@@ -159,6 +155,8 @@ export default function ReservationView({
           keyExtractor={(item) => item.id.toString()}
           style={styles.list}
           showsVerticalScrollIndicator={false}
+          refreshing={refreshing}       
+          onRefresh={handleRefresh}     
         />
       </View>
     </View>
