@@ -16,11 +16,6 @@
     }
   },
   "submit": {
-    "production": {
-      "android": {
-        "serviceAccountKeyPath":"./clappy_service_acount.json",
-        "track": "internal"
-      }
-    }
+    "production": {}
   }
 }

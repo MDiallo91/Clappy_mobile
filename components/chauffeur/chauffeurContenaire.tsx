@@ -116,7 +116,7 @@ const fetchReservations = async () => {
     loadData();
   }, []);
 
-  // 👈 fonction utilisée pour le Pull-to-Refresh
+  //  fonction utilisée pour le Pull-to-Refresh
   const refreshReservations = async () => {
     await fetchReservations();
   };
