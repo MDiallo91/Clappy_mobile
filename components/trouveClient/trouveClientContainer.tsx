@@ -70,7 +70,7 @@ const TrouveClientContainer = () => {
   
         Toast.show({
           type: "success",
-          text1: "Réservation confirmée 🎉",
+          text1: "Réservation confirmée ",
           text2: `Départ : ${reservation.adresseDepart} ➜ ${reservation.adresseDestination}`,
         });
           //  setReservations((prev) =>

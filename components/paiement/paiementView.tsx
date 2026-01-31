@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     },
     tripInfo: {
         backgroundColor: '#f8f8f8',
-        padding: 16,
+        padding: 15,
         borderRadius: 8,
     },
     infoRow: {

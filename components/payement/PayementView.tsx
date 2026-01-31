@@ -11,7 +11,7 @@ export default function PayementView({ onScan }: Props) {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>PAYEMENT</Text>
       <Text style={styles.subtitle}>
-        Réservez seulement si vous êtes à proximité du client
+        Scanner le code QR pour effectuer le paiment
       </Text>
 
       <View style={styles.qrContainer}>
