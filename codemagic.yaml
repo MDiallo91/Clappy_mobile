@@ -1,0 +1,27 @@
+workflows:
+  react-native-ios:
+    name: React Native iOS Build
+    max_build_duration: 60
+    environment:
+      vars:
+        XCODE_WORKSPACE: "ios/Clappy_mobile.xcworkspace"
+        XCODE_SCHEME: "Clappy_mobile"
+      node: latest
+      xcode: latest
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+          cd ios
+          pod install
+      - name: Build iOS
+        script: |
+          cd ios
+          xcodebuild \
+            -workspace Clappy_mobile.xcworkspace \
+            -scheme Clappy_mobile \
+            -sdk iphoneos \
+            -configuration Release \
+            build
+    artifacts:
+      - ios/build/**/*.app
