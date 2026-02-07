@@ -16,9 +16,11 @@ export default function PayementView({ onScan }: Props) {
 
       <View style={styles.qrContainer}>
         <Image
-          source={{
-            uri: "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=reservation",
-          }}
+          // source={{
+          //   // uri: "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=reservation",
+          // }}
+          source={require("@/assets/images/qrCode.jpeg")}
+
           style={styles.qrCode}
         />
         <TouchableOpacity onPress={onScan}>

@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ColorSpace } from "react-native-reanimated";
 
 const BASE_URL =process.env.EXPO_PUBLIC_API_URL;
 
@@ -273,13 +274,34 @@ static async checkTelephoneExists(telephone: string): Promise<{ exists: boolean 
     };
   }
 }
-  static updateUtilisateur(utilisateur: any): Promise<any> {
-    return fetch(`${BASE_URL}user/${utilisateur.id}`, {
-      method: "PUT",
-      body: JSON.stringify(utilisateur),
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      // console.log("error")
+  static async updateUtilisateur(utilisateur: any, id: any): Promise<any> {
+    try {
+      const token = await AsyncStorage.getItem("auth_token");
+      
+      console.log("le user", utilisateur, id)
+      console.log("le user de deuxieme", utilisateur, id)
+      console.log("url",`${BASE_URL}clients/${id}/`)
+      const response = await fetch(`${BASE_URL}clients/${id}/`, {
+        
+        method: "PUT", // ou PATCH (recommandé)
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(utilisateur),
+      });
+
+      const data = await response.json();
+      console.log("resulat du put", data)
+      console.log("resulat du put", response)
+      return {
+        status: response.status,
+        data,
+      };
+    } catch (error) {
+      console.error("Erreur updateUtilisateur :", error);
+      throw error;
+    }
   }
+
 }
