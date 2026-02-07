@@ -3,13 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import UtilisateurService from "@/services/userService";
-
+import { useRouter } from "expo-router";
   const primary="#EE6841"
 
 export default function ProfilScreen() {
 
   const [chauffeur,setChauffeur] = useState<any>()
-  
+  const router = useRouter();
+
     //Recuperer le chauffeur connecter
    useEffect(() => {
       const fetchChauffeur = async () => {
@@ -24,9 +25,10 @@ export default function ProfilScreen() {
       fetchChauffeur();
     }, []);
   
-  const handleEditProfile = () => {
-    // console.log("Modifier le profil");
+   const handleEditProfile = () => {
+    router.push("/updateProfil");
   };
+
 
   const handleChangePhoto = () => {
     // console.log("Changer la photo");

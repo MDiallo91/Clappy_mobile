@@ -7,8 +7,8 @@ export default function ProfilScreen() {
   
   return (
 
-        <ProfilView/>
-        // <ProfilUpdatContainer/>
+        // <ProfilView/>
+        <ProfilUpdatContainer/>
   );
 }
 
