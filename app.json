@@ -2,7 +2,7 @@
   "expo": {
     "name": "clappymobile",
     "slug": "clappyappymobile",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/Clappy_logo.png",
     "scheme": "clappy",
@@ -10,8 +10,8 @@
     "newArchEnabled": true,
     "android": {
       "jsEngine": "hermes",
-      "package": "com.cissefode.clappymobile",
-      "versionCode": 3,
+      "package": "com.cissefode.clappyco",
+      "versionCode": 9,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/Clappy_logo.png",
         "backgroundColor": "#E6F4FE"
@@ -25,7 +25,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.cissefode.clappy"
+      "bundleIdentifier": "com.cissefode.clappy",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "plugins": [
       "expo-router",

@@ -739,7 +739,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                             <Ionicons name="close" size={24} color="#666" />
                         </TouchableOpacity>
                     </View>
-
+                    
                     {distance && duration && (
                         <View style={styles.routeInfo}>
                             <View style={styles.routeInfoItem}>
@@ -758,6 +758,7 @@ export default function MapViews({ trajet, startLat, startLng, destLat, destLng,
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => {
                             const price = calculatePrice(item);
+
                             return (
                                 <TouchableOpacity 
                                     style={[

@@ -9,8 +9,7 @@ export default class VehiculeService {
   try {
     // Récupérer le token stocké
     const token = await AsyncStorage.getItem("auth_token");
-    
-    const response = await fetch(`${BASE_URL}tarifs`, {
+    const response = await fetch(`${BASE_URL}tarifs/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
