@@ -52,9 +52,11 @@ export default function ProfilScreen() {
           style={styles.profileImage}
           contentFit="cover"
         />
-        <TouchableOpacity style={styles.cameraButton} onPress={handleChangePhoto}>
+        {/* annulation de la camera, temporaire */}
+        
+        {/* <TouchableOpacity style={styles.cameraButton} onPress={handleChangePhoto}>
           <Ionicons name="camera" size={20} color="#fff" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Informations */}

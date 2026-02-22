@@ -27,7 +27,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.cissefode.clappy",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "Votre position est utilisée pour afficher les services et contenus proches de vous et améliorer votre expérience locale (ex : afficher les éléments autour de vous sur la carte)."
+      
       }
     },
     "plugins": [

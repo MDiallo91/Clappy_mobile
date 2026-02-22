@@ -10,13 +10,21 @@ import {
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import HandleLogout from "@/components/connexion/deconnexion";
 import LogoutModal from "@/components/connexion/deconnexion";
+import DeleteAcountModal from "@/components/connexion/DeleteAcount";
+import { useRouter } from "expo-router";
+
 
 export default function SettingScreen() {
   const [notifications, setNotifications] = React.useState(true);
   const [location, setLocation] = React.useState(true);
-
+  const router = useRouter();
+  
+  const handleEditProfile = () => {
+    router.push("/updateProfil");
+  };
   //la deconnexion
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalDeleteVisible, setModalDeleteVisible] = useState(false);
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Paramètres</Text>
@@ -25,15 +33,15 @@ export default function SettingScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Mon profil</Text>
 
-        <TouchableOpacity style={styles.item}>
+        <TouchableOpacity style={styles.item}  onPress={handleEditProfile}>
           <Ionicons name="person-outline" size={22} color="#EE6841" />
           <Text style={styles.itemText}>Modifier mes informations</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.item}>
+        {/* <TouchableOpacity style={styles.item}>
           <Ionicons name="lock-closed-outline" size={22} color="#EE6841" />
           <Text style={styles.itemText}>Changer le mot de passe</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/*  Préférences */}
@@ -82,20 +90,32 @@ export default function SettingScreen() {
 
       {/*  Support */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Aide & support</Text>
+        {/* <Text style={styles.sectionTitle}>Aide & support</Text> */}
 
         <TouchableOpacity style={styles.item}>
           <Ionicons name="chatbubbles-outline" size={22} color="#EE6841" />
           <Text style={styles.itemText}>Contacter le support</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.item}>
+        {/* <TouchableOpacity style={styles.item}>
           <Ionicons name="document-text-outline" size={22} color="#EE6841" />
           <Text style={styles.itemText}>Conditions d’utilisation</Text>
+        </TouchableOpacity> */}
+
+        {/* supression du compte */}
+        <DeleteAcountModal
+        visible={modalDeleteVisible}
+        onClose={() => setModalDeleteVisible(false)}
+         />
+         
+         <TouchableOpacity style={styles.item}  onPress={() => setModalDeleteVisible(true)}>
+          <Ionicons name="log-in-sharp" size={22} color="#EE6841" />
+          <Text style={styles.itemText}>Suprimer mon compte</Text>
         </TouchableOpacity>
       </View>
+        
 
-     {/* Modal de deconnexion */}
+      {/* Modal de deconnexion */}
      <LogoutModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}

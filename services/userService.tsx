@@ -1,20 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ColorSpace } from "react-native-reanimated";
 
-const BASE_URL =process.env.EXPO_PUBLIC_API_URL;
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default class UtilisateurService {
 
-  // Login de l'utilisateur
 
-  // Login de l'utilisateur - VERSION CORRIGÉE
+  // Login de l'utilisateur 
   static async login(utilisateur: { username: string; password: string }) {
     try {
-      // console.log(' Tentative de connexion avec:', { 
-      //   username: utilisateur.username,
-      //   url: `${BASE_URL}login/`
-      // });
-      
+
       const response = await fetch(`${BASE_URL}login/`, {
         method: "POST",
         headers: {
@@ -22,18 +17,18 @@ export default class UtilisateurService {
           "Accept": "application/json",
         },
         body: JSON.stringify({
-          username: utilisateur.username,  
+          username: utilisateur.username,
           password: utilisateur.password,
         }),
       });
 
       // console.log(' Statut HTTP:', response.status);
-      
+
       // CORRECTION : Vérifier d'abord si la réponse est OK
       if (!response.ok) {
         // Si le statut n'est pas 200-299, c'est une erreur
         let errorMessage = `Erreur ${response.status}`;
-        
+
         try {
           const errorData = await response.json();
           errorMessage = errorData.detail || errorData.message || errorMessage;
@@ -41,7 +36,7 @@ export default class UtilisateurService {
           // Si la réponse n'est pas JSON, utiliser le statut
           errorMessage = `Erreur serveur: ${response.status}`;
         }
-        
+
         throw new Error(errorMessage);
       }
 
@@ -56,18 +51,18 @@ export default class UtilisateurService {
           await AsyncStorage.setItem("auth_token", data.token);
           // console.log(' Token sauvegardé:', data.token.substring(0, 20) + '...');
         }
-        
+
         // Sauvegarder les données utilisateur
         if (data.user) {
           await AsyncStorage.setItem("userData", JSON.stringify(data.user));
           // console.log(' Données utilisateur sauvegardées:', data.user.username);
         }
-        
+
         // Sauvegarder le token de rafraîchissement si disponible
         if (data.refresh_token) {
           await AsyncStorage.setItem("refresh_token", data.refresh_token);
         }
-        
+
         return {
           status: 'success',
           message: data.message,
@@ -75,7 +70,7 @@ export default class UtilisateurService {
           user: data.user,
           refresh_token: data.refresh_token
         };
-        
+
       } else {
         // Le backend a retourné un status 'error'
         throw new Error(data.message || 'Erreur de connexion');
@@ -98,12 +93,12 @@ export default class UtilisateurService {
     try {
       const [token, userDataString] = await Promise.all([
         AsyncStorage.getItem("auth_token"),
-        AsyncStorage.getItem("userData")
+        AsyncStorage.getItem("userData"),
       ]);
-      
+
       const user = userDataString ? JSON.parse(userDataString) : null;
-      
-      
+
+
       return {
         isAuthenticated: !!(token && user),
         user: user,
@@ -120,14 +115,14 @@ export default class UtilisateurService {
   }
 
   // Déconnexion
-  static async logout(): Promise<{status: string, message: string}> {
+  static async logout(): Promise<{ status: string, message: string }> {
     try {
       await AsyncStorage.multiRemove([
-        "auth_token", 
-        "userData", 
+        "auth_token",
+        "userData",
         "refresh_token"
       ]);
-      
+
       // console.log('✅ Déconnexion réussie');
       return {
         status: 'success',
@@ -141,148 +136,148 @@ export default class UtilisateurService {
       };
     }
   }
-// services/clientService.ts
-static async addUtilisateur(clientData: {
-  email: string;
-  nom: string;
-  prenom: string;
-  telephone: string;
-  password?: string;
-}): Promise<{ data: any; status: number; message: string }> {
-  try {
-    // console.log(" Envoi des données d'inscription:", clientData);
+  // services/clientService.ts
+  static async addUtilisateur(clientData: {
+    email: string;
+    nom: string;
+    prenom: string;
+    telephone: string;
+    password?: string;
+  }): Promise<{ data: any; status: number; message: string }> {
+    try {
+      // console.log(" Envoi des données d'inscription:", clientData);
 
-    const response = await fetch(`${BASE_URL}clients/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(clientData),
-    });
+      const response = await fetch(`${BASE_URL}clients/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(clientData),
+      });
 
-    const httpStatus = response.status;
-    let responseData = null;
+      const httpStatus = response.status;
+      let responseData = null;
 
-    // Vérifier le content-type avant de parser JSON
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      responseData = await response.json();
-    }
+      // Vérifier le content-type avant de parser JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        responseData = await response.json();
+      }
 
-    // console.log("📨 Statut HTTP:", httpStatus);
-    // console.log("📨 Réponse brute:", responseData);
+      // console.log("📨 Statut HTTP:", httpStatus);
+      // console.log("📨 Réponse brute:", responseData);
 
-    if (response.ok) {
+      if (response.ok) {
+        return {
+          data: responseData,
+          status: httpStatus,
+          message: "Inscription réussie"
+        };
+      } else {
+        return {
+          data: responseData,
+          status: httpStatus,
+          message: responseData?.utilisateur?.[0] ||
+            responseData?.email?.[0] ||
+            responseData?.telephone?.[0] ||
+            "Erreur lors de l'inscription"
+        };
+      }
+
+    } catch (error) {
+      // console.error("❌ Erreur inscription:", error);
       return {
-        data: responseData,
-        status: httpStatus,
-        message: "Inscription réussie"
-      };
-    } else {
-      return {
-        data: responseData,
-        status: httpStatus,
-        message: responseData?.utilisateur?.[0] || 
-                responseData?.email?.[0] || 
-                responseData?.telephone?.[0] ||
-                "Erreur lors de l'inscription"
+        data: null,
+        status: 500,
+        message: "Erreur réseau lors de l'inscription"
       };
     }
-
-  } catch (error) {
-    // console.error("❌ Erreur inscription:", error);
-    return {
-      data: null,
-      status: 500,
-      message: "Erreur réseau lors de l'inscription"
-    };
   }
-}
-// Récupérer les utilisateurs
   // Récupérer les utilisateurs
-static async getUser(): Promise<any> {
-  try {
-    // Récupérer le token stocké
-    const token = await AsyncStorage.getItem("auth_token");
-    
-    const response = await fetch(`${BASE_URL}me/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, // Ajout du token
-      },
-    });
+  // Récupérer les utilisateurs
+  static async getUser(): Promise<any> {
+    try {
+      // Récupérer le token stocké
+      const token = await AsyncStorage.getItem("auth_token");
 
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP! statut: ${response.status}`);
+      const response = await fetch(`${BASE_URL}me/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // Ajout du token
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP! statut: ${response.status}`);
+      }
+
+      const users = await response.json();
+      // console.log('Utilisateurs récupérés:', users);
+      return users;
+
+    } catch (error) {
+      // console.error('Erreur de connexion:', error);
+      throw error;
     }
-
-    const users = await response.json();
-    // console.log('Utilisateurs récupérés:', users);
-    return users;
-
-  } catch (error) {
-    // console.error('Erreur de connexion:', error);
-    throw error;
   }
-}
 
-//Verifier si le telephone existe deja dans la base avant de cree le compte
+  //Verifier si le telephone existe deja dans la base avant de cree le compte
   // Vérifier si le téléphone existe déjà
-// Dans userService.ts
-static async checkTelephoneExists(telephone: string): Promise<{ exists: boolean }> {
-  try {
-    // console.log('🔍 Vérification du téléphone:', telephone);
-    
-    const response = await fetch(`${BASE_URL}check-phone/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ telephone }),
-    });
+  // Dans userService.ts
+  static async checkTelephoneExists(telephone: string): Promise<{ exists: boolean }> {
+    try {
+      // console.log('🔍 Vérification du téléphone:', telephone);
 
-    console.log('📊 Statut HTTP:', response.status);
-    
-    // Vérifier le Content-Type avant de parser
-    const contentType = response.headers.get('content-type');
-    
-    if (!contentType || !contentType.includes('application/json')) {
-      // Si ce n'est pas du JSON, lire le texte pour debugger
-      const textResponse = await response.text();
-      // console.error('❌ Réponse non-JSON:', textResponse.substring(0, 200));
-      throw new Error('Le serveur a retourné une réponse non-JSON');
+      const response = await fetch(`${BASE_URL}check-phone/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ telephone }),
+      });
+
+      console.log('📊 Statut HTTP:', response.status);
+
+      // Vérifier le Content-Type avant de parser
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+        // Si ce n'est pas du JSON, lire le texte pour debugger
+        const textResponse = await response.text();
+        // console.error('❌ Réponse non-JSON:', textResponse.substring(0, 200));
+        throw new Error('Le serveur a retourné une réponse non-JSON');
+      }
+
+      if (!response.ok) {
+        throw new Error(`Erreur ${response.status}`);
+      }
+
+      const data = await response.json();
+      // console.log("✅ Réponse vérification téléphone:", data);
+
+      return {
+        exists: data.exists || false
+      };
+
+    } catch (error: any) {
+      // console.error("❌ Erreur vérification téléphone:", error.message || error);
+
+      // En cas d'erreur, on suppose que le numéro n'existe pas
+      return {
+        exists: false
+      };
     }
-    
-    if (!response.ok) {
-      throw new Error(`Erreur ${response.status}`);
-    }
-
-    const data = await response.json();
-    // console.log("✅ Réponse vérification téléphone:", data);
-    
-    return {
-      exists: data.exists || false
-    };
-
-  } catch (error: any) {
-    // console.error("❌ Erreur vérification téléphone:", error.message || error);
-    
-    // En cas d'erreur, on suppose que le numéro n'existe pas
-    return {
-      exists: false
-    };
   }
-}
   static async updateUtilisateur(utilisateur: any, id: any): Promise<any> {
     try {
       const token = await AsyncStorage.getItem("auth_token");
-      
+
       console.log("le user", utilisateur, id)
       console.log("le user de deuxieme", utilisateur, id)
-      console.log("url",`${BASE_URL}clients/${id}/`)
+      console.log("url", `${BASE_URL}clients/${id}/`)
       const response = await fetch(`${BASE_URL}clients/${id}/`, {
-        
+
         method: "PUT", // ou PATCH (recommandé)
         headers: {
           "Content-Type": "application/json",
@@ -292,8 +287,8 @@ static async checkTelephoneExists(telephone: string): Promise<{ exists: boolean 
       });
 
       const data = await response.json();
-      console.log("resulat du put", data)
-      console.log("resulat du put", response)
+      // console.log("resulat du put", data)
+      // console.log("resulat du put", response)
       return {
         status: response.status,
         data,
@@ -304,4 +299,41 @@ static async checkTelephoneExists(telephone: string): Promise<{ exists: boolean 
     }
   }
 
+   static async deleteUtilisateur(id: any): Promise<any> {
+  try {
+    const token = await AsyncStorage.getItem("auth_token");
+
+    const response = await fetch(`${BASE_URL}clients/${id}/`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    //  Si succès sans contenu (cas normal pour DELETE)
+    if (response.status === 204) {
+      return { status: 204 };
+    }
+
+    // Lire le body en texte pour éviter crash
+    const text = await response.text();
+
+    // Si body vide
+    if (!text) {
+      return { status: response.status };
+    }
+
+    // Si backend renvoie quand même du JSON
+    const data = JSON.parse(text);
+
+    return {
+      status: response.status,
+      data,
+    };
+
+  } catch (error) {
+    console.error("Erreur deleteUtilisateur :", error);
+    throw error;
+  }
+}
 }
