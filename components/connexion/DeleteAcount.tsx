@@ -32,18 +32,21 @@ export default function DeleteAccountModal({
 
       const userData = JSON.parse(userDataString);
 
-      const response = await UtilisateurService.deleteUtilisateur(userData.client_id);
-
+      const response = await UtilisateurService.deleteUtilisateur();
+      console.log("la reponse dans deleteAcount", response)
       if (response?.status === 200 || response?.status === 204) {
         // Supprimer données locales
         await AsyncStorage.removeItem("userData");
         await AsyncStorage.removeItem("auth_token");
 
         // Fermer modal
+
         onClose();
 
         // Redirection vers connexion
-        router.replace("/(auth)/connexion");
+         setTimeout(() => {
+            router.replace("/(auth)/connexion");
+          }, 500);
       } else {
         Alert.alert("Erreur", "Impossible de supprimer le compte.");
       }

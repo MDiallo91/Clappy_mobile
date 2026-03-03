@@ -47,11 +47,12 @@ export default function ProfilScreen() {
 
       {/* Photo de profil + icône caméra */}
       <View style={styles.imageContainer}>
-        <Image
+        {/* <Image
           source={require("@/assets/images/profile.jpeg")}
           style={styles.profileImage}
           contentFit="cover"
-        />
+        /> */}
+        
         {/* annulation de la camera, temporaire */}
         
         {/* <TouchableOpacity style={styles.cameraButton} onPress={handleChangePhoto}>

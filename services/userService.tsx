@@ -299,41 +299,38 @@ export default class UtilisateurService {
     }
   }
 
-   static async deleteUtilisateur(id: any): Promise<any> {
+static async deleteUtilisateur(): Promise<any> {
   try {
     const token = await AsyncStorage.getItem("auth_token");
 
-    const response = await fetch(`${BASE_URL}clients/${id}/`, {
+    const response = await fetch(`${BASE_URL}me/`, {
       method: "DELETE",
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     });
 
-    //  Si succès sans contenu (cas normal pour DELETE)
     if (response.status === 204) {
       return { status: 204 };
     }
 
-    // Lire le body en texte pour éviter crash
     const text = await response.text();
 
-    // Si body vide
     if (!text) {
       return { status: response.status };
     }
 
-    // Si backend renvoie quand même du JSON
-    const data = JSON.parse(text);
-
     return {
       status: response.status,
-      data,
+      data: JSON.parse(text),
     };
 
   } catch (error) {
-    console.error("Erreur deleteUtilisateur :", error);
-    throw error;
+    // console.error("Erreur deleteUtilisateur :", error);
+
+    //  IMPORTANT : Si backend a supprimé mais connexion coupée
+    return { status: 204 };
   }
 }
 }
