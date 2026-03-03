@@ -92,10 +92,10 @@ export default function SettingScreen() {
       <View style={styles.section}>
         {/* <Text style={styles.sectionTitle}>Aide & support</Text> */}
 
-        <TouchableOpacity style={styles.item}>
+        {/* <TouchableOpacity style={styles.item}>
           <Ionicons name="chatbubbles-outline" size={22} color="#EE6841" />
           <Text style={styles.itemText}>Contacter le support</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* <TouchableOpacity style={styles.item}>
           <Ionicons name="document-text-outline" size={22} color="#EE6841" />
