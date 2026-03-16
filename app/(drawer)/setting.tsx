@@ -38,69 +38,14 @@ export default function SettingScreen() {
           <Text style={styles.itemText}>Modifier mes informations</Text>
         </TouchableOpacity>
 
-        {/* <TouchableOpacity style={styles.item}>
-          <Ionicons name="lock-closed-outline" size={22} color="#EE6841" />
-          <Text style={styles.itemText}>Changer le mot de passe</Text>
-        </TouchableOpacity> */}
       </View>
 
-      {/*  Préférences */}
-      {/* <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Préférences</Text>
-
-        <TouchableOpacity style={styles.item}>
-          <Ionicons name="car-outline" size={22} color="#EE6841" />
-          <Text style={styles.itemText}>Type de véhicule préféré</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.item}>
-          <MaterialIcons name="payment" size={22} color="#EE6841" />
-          <Text style={styles.itemText}>Mode de paiement</Text>
-        </TouchableOpacity>
-      </View> */}
-
-      {/*  Confidentialité */}
-      {/* <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Confidentialité</Text>
-
-        <View style={styles.switchRow}>
-          <View style={styles.switchLabel}>
-            <Ionicons name="notifications-outline" size={22} color="#EE6841" />
-            <Text style={styles.itemText}>Notifications</Text>
-          </View>
-          <Switch
-            value={notifications}
-            onValueChange={setNotifications}
-            thumbColor={notifications ? "#EE6841" : "#ccc"}
-          />
-        </View>
-
-        <View style={styles.switchRow}>
-          <View style={styles.switchLabel}>
-            <Ionicons name="location-outline" size={22} color="#EE6841" />
-            <Text style={styles.itemText}>Autoriser la géolocalisation</Text>
-          </View>
-          <Switch
-            value={location}
-            onValueChange={setLocation}
-            thumbColor={location ? "#EE6841" : "#ccc"}
-          />
-        </View>
-      </View> */}
+    
 
       {/*  Support */}
       <View style={styles.section}>
         {/* <Text style={styles.sectionTitle}>Aide & support</Text> */}
 
-        {/* <TouchableOpacity style={styles.item}>
-          <Ionicons name="chatbubbles-outline" size={22} color="#EE6841" />
-          <Text style={styles.itemText}>Contacter le support</Text>
-        </TouchableOpacity> */}
-
-        {/* <TouchableOpacity style={styles.item}>
-          <Ionicons name="document-text-outline" size={22} color="#EE6841" />
-          <Text style={styles.itemText}>Conditions d’utilisation</Text>
-        </TouchableOpacity> */}
 
         {/* supression du compte */}
         <DeleteAcountModal

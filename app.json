@@ -24,12 +24,12 @@
       "permissions": []
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.cissefode.clappy",
+      "buildNumber": "17",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSLocationWhenInUseUsageDescription": "L'application a besoin de votre postion"
-      
+        "NSLocationWhenInUseUsageDescription": "Clappy uses your location to show you nearby creators, events, and services around you. For example, when you search for a photographer near you, we use your GPS position to display results within your area."
       }
     },
     "plugins": [
