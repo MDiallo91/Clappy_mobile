@@ -4,10 +4,14 @@ import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import UtilisateurService from "@/services/userService";
 import { useRouter } from "expo-router";
+import DeleteAcountModal from "@/components/connexion/DeleteAcount";
+
+
   const primary="#EE6841"
 
 export default function ProfilScreen() {
 
+  const [modalDeleteVisible, setModalDeleteVisible] = useState(false);
   const [chauffeur,setChauffeur] = useState<any>()
   const router = useRouter();
 
@@ -88,6 +92,17 @@ export default function ProfilScreen() {
           <Text style={styles.value}> {chauffeur?.email} </Text>
         </View>
       </View>
+
+      {/* suppression du compte utilisatuer */}
+      <DeleteAcountModal
+              visible={modalDeleteVisible}
+              onClose={() => setModalDeleteVisible(false)}
+               />
+               
+               <TouchableOpacity style={styles.item}  onPress={() => setModalDeleteVisible(true)}>
+                <Ionicons name="log-in-sharp" size={22} color="#EE6841" />
+                <Text style={styles.itemText}>Suprimer mon compte</Text>
+              </TouchableOpacity>
     </View>
   );
 }
@@ -168,5 +183,19 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#eee",
     marginVertical: 10,
+  },
+  item: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderColor: "#eee",
+    marginTop:40,
+    
+  },
+  itemText: {
+    marginLeft: 12,
+    fontSize: 15,
+    color: "#333",
   },
 });
